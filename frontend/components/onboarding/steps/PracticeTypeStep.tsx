@@ -46,7 +46,10 @@ export function PracticeTypeStep({
             onValueChange={(value) => handleTypeChange(value as "facility" | "group")}
           >
             <div className="space-y-4">
-              <Card className={`cursor-pointer transition-colors ${data?.type === "facility" ? "ring-2 ring-blue-500" : ""}`}>
+              <Card
+                className={`cursor-pointer transition-colors ${data?.type === "facility" ? "ring-2 ring-blue-500" : ""}`}
+                onClick={() => handleTypeChange("facility")}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
                     <RadioGroupItem value="facility" id="facility" />
@@ -63,7 +66,10 @@ export function PracticeTypeStep({
                 </CardContent>
               </Card>
 
-              <Card className={`cursor-pointer transition-colors ${data?.type === "group" ? "ring-2 ring-blue-500" : ""}`}>
+              <Card
+                className={`cursor-pointer transition-colors ${data?.type === "group" ? "ring-2 ring-blue-500" : ""}`}
+                onClick={() => handleTypeChange("group")}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
                     <RadioGroupItem value="group" id="group" />

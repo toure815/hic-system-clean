@@ -56,7 +56,10 @@ export function IdentifyProviderStep({
             onValueChange={(value) => handleTypeChange(value as "new" | "existing")}
           >
             <div className="space-y-4">
-              <Card className={`cursor-pointer transition-colors ${data?.type === "new" ? "ring-2 ring-blue-500" : ""}`}>
+              <Card
+                className={`cursor-pointer transition-colors ${data?.type === "new" ? "ring-2 ring-blue-500" : ""}`}
+                onClick={() => handleTypeChange("new")}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
                     <RadioGroupItem value="new" id="new-provider" />
@@ -73,7 +76,10 @@ export function IdentifyProviderStep({
                 </CardContent>
               </Card>
 
-              <Card className={`cursor-pointer transition-colors ${data?.type === "existing" ? "ring-2 ring-blue-500" : ""}`}>
+              <Card
+                className={`cursor-pointer transition-colors ${data?.type === "existing" ? "ring-2 ring-blue-500" : ""}`}
+                onClick={() => handleTypeChange("existing")}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
                     <RadioGroupItem value="existing" id="existing-provider" />
@@ -89,7 +95,7 @@ export function IdentifyProviderStep({
                   </div>
                   
                   {data?.type === "existing" && (
-                    <div className="mt-4 ml-8">
+                    <div className="mt-4 ml-8" onClick={(e) => e.stopPropagation()}>
                       <Label htmlFor="provider-id">Provider ID (if available)</Label>
                       <Input
                         id="provider-id"
