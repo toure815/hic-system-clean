@@ -8,8 +8,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { format, parse, isValid } from "date-fns";
 import { cn } from "@/lib/utils";
+import { formatEIN, formatPhoneNumber, formatSSN, formatDateMMDDYYYY } from "@/utils/formatters";
 
 interface BusinessProfileData {
   businessName: string;
@@ -75,6 +76,10 @@ export function BusinessProfileStep({
     onChange({ ...currentData, ...updates });
   };
 
+  const handleFormattedChange = (field: keyof BusinessProfileData, value: string, formatter: (val: string) => string) => {
+    handleChange({ [field]: formatter(value) });
+  };
+
   const handleAdditionalLocationChange = (index: number, value: string) => {
     const newLocations = [...currentData.additionalLocations];
     newLocations[index] = value;
@@ -104,7 +109,8 @@ export function BusinessProfileStep({
     currentData.caqh &&
     currentData.hoursOfOperation;
 
-  const dateOfBirthAsDate = currentData.dateOfBirth ? new Date(currentData.dateOfBirth.replace(/-/g, '/')) : undefined;
+  const parsedDate = parse(currentData.dateOfBirth, 'MM/dd/yyyy', new Date());
+  const dateOfBirthAsDate = isValid(parsedDate) ? parsedDate : undefined;
 
   return (
     <div className="space-y-6">
@@ -127,7 +133,7 @@ export function BusinessProfileStep({
             </div>
             <div className="space-y-2">
               <Label htmlFor="ssn">Social Security Number (SSN) *</Label>
-              <Input id="ssn" value={currentData.ssn} onChange={(e) => handleChange({ ssn: e.target.value })} placeholder="XXX-XX-XXXX" />
+              <Input id="ssn" value={currentData.ssn} onChange={(e) => handleFormattedChange("ssn", e.target.value, formatSSN)} placeholder="XXX-XX-XXXX" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="dateOfBirth">Date of Birth *</Label>
@@ -136,9 +142,9 @@ export function BusinessProfileStep({
                   <Input
                     id="dateOfBirth"
                     type="text"
-                    placeholder="YYYY-MM-DD"
+                    placeholder="MM/DD/YYYY"
                     value={currentData.dateOfBirth}
-                    onChange={(e) => handleChange({ dateOfBirth: e.target.value })}
+                    onChange={(e) => handleFormattedChange("dateOfBirth", e.target.value, formatDateMMDDYYYY)}
                     className="pr-10"
                   />
                   <PopoverTrigger asChild>
@@ -155,7 +161,7 @@ export function BusinessProfileStep({
                     toYear={new Date().getFullYear() - 18}
                     selected={dateOfBirthAsDate}
                     onSelect={(date) =>
-                      handleChange({ dateOfBirth: date ? format(date, "yyyy-MM-dd") : "" })
+                      handleChange({ dateOfBirth: date ? format(date, "MM/dd/yyyy") : "" })
                     }
                     initialFocus
                   />
@@ -204,7 +210,7 @@ export function BusinessProfileStep({
 
             <div className="space-y-2">
               <Label htmlFor="einNumber">EIN Number (Tax ID) *</Label>
-              <Input id="einNumber" value={currentData.einNumber} onChange={(e) => handleChange({ einNumber: e.target.value })} placeholder="XX-XXXXXXX" />
+              <Input id="einNumber" value={currentData.einNumber} onChange={(e) => handleFormattedChange("einNumber", e.target.value, formatEIN)} placeholder="XX-XXXXXXX" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="npiNumber">Individual NPI Number *</Label>
@@ -220,7 +226,7 @@ export function BusinessProfileStep({
             </div>
             <div className="space-y-2">
               <Label htmlFor="businessPhoneNumber">Business Phone Number *</Label>
-              <Input id="businessPhoneNumber" type="tel" value={currentData.businessPhoneNumber} onChange={(e) => handleChange({ businessPhoneNumber: e.target.value })} placeholder="(555) 555-5555" />
+              <Input id="businessPhoneNumber" type="tel" value={currentData.businessPhoneNumber} onChange={(e) => handleFormattedChange("businessPhoneNumber", e.target.value, formatPhoneNumber)} placeholder="(555) 555-5555" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="businessEmail">Business Email *</Label>
@@ -228,7 +234,7 @@ export function BusinessProfileStep({
             </div>
             <div className="space-y-2">
               <Label htmlFor="businessFaxNumber">Business Fax Number (Optional)</Label>
-              <Input id="businessFaxNumber" type="tel" value={currentData.businessFaxNumber || ""} onChange={(e) => handleChange({ businessFaxNumber: e.target.value })} placeholder="(555) 555-5556" />
+              <Input id="businessFaxNumber" type="tel" value={currentData.businessFaxNumber || ""} onChange={(e) => handleFormattedChange("businessFaxNumber", e.target.value, formatPhoneNumber)} placeholder="(555) 555-5556" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="caqh">CAQH ID *</Label>

@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
+import { format, parse, isValid } from "date-fns";
 import { cn } from "@/lib/utils";
+import { formatDateMMDDYYYY } from "@/utils/formatters";
 
 interface License {
   state: string;
@@ -86,7 +87,8 @@ export function LicensesStep({
         </CardHeader>
         <CardContent className="space-y-6">
           {licenses.map((license, index) => {
-            const expirationDateAsDate = license.expirationDate ? new Date(license.expirationDate.replace(/-/g, '/')) : undefined;
+            const parsedDate = parse(license.expirationDate, 'MM/dd/yyyy', new Date());
+            const expirationDateAsDate = isValid(parsedDate) ? parsedDate : undefined;
             return (
               <div key={index} className="border rounded-lg p-4 space-y-4">
                 <div className="flex items-center justify-between">
@@ -138,9 +140,9 @@ export function LicensesStep({
                       <div className="relative">
                         <Input
                           type="text"
-                          placeholder="YYYY-MM-DD"
+                          placeholder="MM/DD/YYYY"
                           value={license.expirationDate}
-                          onChange={(e) => updateLicense(index, "expirationDate", e.target.value)}
+                          onChange={(e) => updateLicense(index, "expirationDate", formatDateMMDDYYYY(e.target.value))}
                           className="pr-10"
                         />
                         <PopoverTrigger asChild>
@@ -157,7 +159,7 @@ export function LicensesStep({
                           toYear={new Date().getFullYear() + 20}
                           selected={expirationDateAsDate}
                           onSelect={(date) =>
-                            updateLicense(index, "expirationDate", date ? format(date, "yyyy-MM-dd") : "")
+                            updateLicense(index, "expirationDate", date ? format(date, "MM/dd/yyyy") : "")
                           }
                           initialFocus
                         />
