@@ -1,7 +1,4 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useBackend } from "../hooks/useBackend";
-import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 import { OnboardingSteps } from "../components/onboarding/OnboardingSteps";
 import { OnboardingProgress } from "../components/onboarding/OnboardingProgress";
 import type { OnboardingStepData, OnboardingStep } from "../types/onboarding";
@@ -17,102 +14,29 @@ const STEPS: OnboardingStep[] = [
 ];
 
 export function OnboardingStartPage() {
-  const api = useBackend();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepData, setStepData] = useState<OnboardingStepData>({});
 
-  // Load existing draft (AUTH)
-  const { data: draftResponse } = useQuery({
-    queryKey: ["onboarding-draft"],
-    queryFn: async () => {
-      const authed = await api.withAuth();
-      return authed.onboarding.getDraft();
-    },
-  });
-
-  // Initialize state from draft
-  useEffect(() => {
-    const draft = draftResponse?.draft;
-    if (draft) {
-      setStepData(draft.stepData);
-      const stepIndex = STEPS.indexOf(draft.currentStep);
-      if (stepIndex >= 0) setCurrentStepIndex(stepIndex);
-    }
-  }, [draftResponse]);
-
-  // Save draft (AUTH)
-  const saveDraftMutation = useMutation({
-    mutationFn: async (data: { stepData: OnboardingStepData; currentStep: OnboardingStep }) => {
-      const authed = await api.withAuth();
-      return authed.onboarding.saveDraft(data);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["onboarding-draft"] });
-    },
-    onError: (error: any) => {
-      console.error("Save draft error:", error);
-      toast({
-        title: "Error saving progress",
-        description: error?.message || "Failed to save your progress",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Complete onboarding (AUTH)
-  const completeOnboardingMutation = useMutation({
-    mutationFn: async (finalStepData: OnboardingStepData) => {
-      const authed = await api.withAuth();
-      return authed.onboarding.completeOnboarding({ finalStepData });
-    },
-    onSuccess: () => {
-      toast({
-        title: "Onboarding complete!",
-        description: "Your credentialing application has been submitted successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["onboarding-draft"] });
-    },
-    onError: (error: any) => {
-      console.error("Complete onboarding error:", error);
-      toast({
-        title: "Error completing onboarding",
-        description: error?.message || "Failed to complete the onboarding process",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleStepChange = (newStepData: Partial<OnboardingStepData>) => {
-    const updated = { ...stepData, ...newStepData };
-    setStepData(updated);
-    // Auto-save draft
-    saveDraftMutation.mutate({
-      stepData: updated,
-      currentStep: STEPS[currentStepIndex],
-    });
+    const updatedStepData = { ...stepData, ...newStepData };
+    setStepData(updatedStepData);
+    // 🚨 Skip backend call for now
   };
 
   const handleNext = () => {
     if (currentStepIndex < STEPS.length - 1) {
-      const nextIndex = currentStepIndex + 1;
-      setCurrentStepIndex(nextIndex);
-      saveDraftMutation.mutate({ stepData, currentStep: STEPS[nextIndex] });
+      setCurrentStepIndex(currentStepIndex + 1);
     }
   };
 
   const handlePrevious = () => {
     if (currentStepIndex > 0) {
-      const prevIndex = currentStepIndex - 1;
-      setCurrentStepIndex(prevIndex);
-      saveDraftMutation.mutate({ stepData, currentStep: STEPS[prevIndex] });
+      setCurrentStepIndex(currentStepIndex - 1);
     }
   };
 
   const handleComplete = () => {
-    completeOnboardingMutation.mutate(stepData);
+    console.log("Final data (prototype only):", stepData);
   };
 
   const currentStep = STEPS[currentStepIndex];
@@ -137,7 +61,7 @@ export function OnboardingStartPage() {
         canGoNext={true} // add validation later
         canGoPrevious={currentStepIndex > 0}
         isLastStep={isLastStep}
-        isLoading={saveDraftMutation.isPending || completeOnboardingMutation.isPending}
+        isLoading={false}
       />
     </div>
   );
