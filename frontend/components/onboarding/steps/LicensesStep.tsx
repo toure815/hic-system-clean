@@ -180,20 +180,22 @@ export function LicensesStep({
         </CardContent>
       </Card>
 
-      <div className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={onPrevious}
-          disabled={!canGoPrevious || isLoading}
-        >
-          Previous
-        </Button>
-        <Button
-          onClick={onNext}
-          disabled={!canGoNext || !isValid || isLoading}
-        >
-          {isLoading ? "Saving..." : "Next"}
-        </Button>
+      <div className="fixed bottom-0 left-0 right-0 z-10 border-t bg-background/95 p-4 md:relative md:border-0 md:p-0">
+        <div className="mx-auto flex max-w-4xl justify-between">
+          <Button
+            variant="outline"
+            onClick={onPrevious}
+            disabled={!canGoPrevious || isLoading}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={onNext}
+            disabled={!canGoNext || !isValid || isLoading}
+          >
+            {isLoading ? "Saving..." : "Next"}
+          </Button>
+        </div>
       </div>
     </div>
   );
