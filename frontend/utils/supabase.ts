@@ -1,25 +1,23 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-// Read Vite first; if not present, fall back to NEXT_PUBLIC_*.
-// Do NOT fall back to localhost, and do NOT throw (white screens).
-const env = (import.meta as any).env ?? {};
-const SUPABASE_URL: string | undefined =
-  (env.VITE_SUPABASE_URL as string | undefined)?.trim() ||
-  (env.NEXT_PUBLIC_SUPABASE_URL as string | undefined)?.trim();
+// Read what the Preview runtime injects
+const SUPABASE_URL = (typeof process !== "undefined"
+  ? (process as any).env?.NEXT_PUBLIC_SUPABASE_URL
+  : undefined) as string | undefined;
 
-const SUPABASE_ANON_KEY: string | undefined =
-  (env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim() ||
-  (env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string | undefined)?.trim();
+const SUPABASE_ANON_KEY = (typeof process !== "undefined"
+  ? (process as any).env?.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  : undefined) as string | undefined;
 
-// Expose a tiny debug payload you can check in the browser console
-(window as any).__ENV = {
-  supabaseUrl: SUPABASE_URL ?? null,
-  anonKeyLen: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.length : 0,
+// Expose for quick browser check (Console -> type window.__ENV)
+;(typeof window !== "undefined" ? (window as any) : {}).__ENV = {
+  NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL ?? null,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY_LEN: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.length : 0,
 };
 
-// Create the client. If envs are missing, calls will fail clearly,
-// but the app will still render (no blank page).
-export const supabase: SupabaseClient = createClient(
-  SUPABASE_URL ?? "",
-  SUPABASE_ANON_KEY ?? ""
-);
+// Do not silently fall back to http://localhost (that caused the mixed-content block)
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error("Supabase env missing: check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY secrets.");
+}
+
+export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
