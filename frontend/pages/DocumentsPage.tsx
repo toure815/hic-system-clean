@@ -1,5 +1,5 @@
 import { useAuth } from "../contexts/AuthContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Upload, FileText, Check, X } from "lucide-react";
+import { Upload, FileText, Check, X, ArrowLeft } from "lucide-react";
 import { useState, useRef } from "react";
 
 type Document = {
@@ -22,6 +22,7 @@ type Document = {
 export function DocumentsPage() {
   const { user, loading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -160,11 +161,20 @@ export function DocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Upload Documents</h1>
-        <p className="text-gray-600 mt-1">
-          Upload and manage your credentialing documents
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Upload Documents</h1>
+          <p className="text-gray-600 mt-1">
+            Upload and manage your credentialing documents
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => navigate("/portal")}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Portal
+        </Button>
       </div>
 
       <Card>

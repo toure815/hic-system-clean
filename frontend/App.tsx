@@ -9,6 +9,7 @@ import { SignupPage } from "./pages/SignupPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
 import { DocumentsPage } from "./pages/DocumentsPage";
+import { SettingsPage } from "./pages/SettingsPage";
 import { OnboardingStartPage } from "./pages/OnboardingStartPage";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -49,6 +50,14 @@ export default function App() {
                   element={
                     <ProtectedRoute allowedRoles={["client"]}>
                       <DocumentsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute allowedRoles={["client"]}>
+                      <SettingsPage />
                     </ProtectedRoute>
                   }
                 />
