@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { MOCK_AUTH } from "../utils/featureFlags";
 
 export function LoginPage() {
   const { loginWithEmail, user, loading } = useAuth();
@@ -45,6 +46,12 @@ export function LoginPage() {
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold text-center mb-6">Sign in</h1>
+
+        {MOCK_AUTH && (
+          <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
+            Mock auth is ON – any email/password will sign in (emails with “admin” get admin role).
+          </div>
+        )}
 
         <form onSubmit={onSubmit} className="space-y-4">
           <input
