@@ -24,16 +24,18 @@ export interface OnboardingStepData {
     providerName: string;
     ssn: string;
     dateOfBirth: string;
-    businessAddress: string;
+    primaryAddress: string;
+    additionalLocations: string[];
     einNumber: string;
     npiNumber: string;
+    groupNpiNumber?: string;
     countyOfBusiness: string;
     businessPhoneNumber: string;
     businessEmail: string;
-    businessFaxNumber: string;
+    businessFaxNumber?: string;
     caqh: string;
     hoursOfOperation: string;
-    businessWebsite: string;
+    businessWebsite?: string;
   };
   licenses?: {
     licenses: Array<{
