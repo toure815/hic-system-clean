@@ -1,7 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Heart, Brain } from "lucide-react";
 
 interface SpecialtyData {
@@ -40,47 +38,40 @@ export function SpecialtyStep({
             Select your primary medical specialty
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <RadioGroup
-            value={data?.type || ""}
-            onValueChange={(value) => handleTypeChange(value as "primary-care" | "behavioral")}
+        <CardContent className="space-y-4">
+          <div
+            onClick={() => handleTypeChange("primary-care")}
+            className={`flex items-start space-x-3 p-4 border rounded-md min-h-[80px] cursor-pointer transition-colors ${
+              data?.type === "primary-care" ? "border-blue-500 ring-2 ring-blue-500" : "border-gray-200 hover:border-gray-300"
+            }`}
           >
-            <div className="space-y-4">
-              <Card className={`cursor-pointer transition-colors ${data?.type === "primary-care" ? "ring-2 ring-blue-500" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="primary-care" id="primary-care" />
-                    <Heart className="h-5 w-5 text-red-600" />
-                    <div>
-                      <Label htmlFor="primary-care" className="text-base font-medium cursor-pointer">
-                        Primary Care
-                      </Label>
-                      <p className="text-sm text-gray-600">
-                        Family medicine, internal medicine, pediatrics, etc.
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className={`cursor-pointer transition-colors ${data?.type === "behavioral" ? "ring-2 ring-blue-500" : ""}`}>
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="behavioral" id="behavioral" />
-                    <Brain className="h-5 w-5 text-purple-600" />
-                    <div>
-                      <Label htmlFor="behavioral" className="text-base font-medium cursor-pointer">
-                        Behavioral Health
-                      </Label>
-                      <p className="text-sm text-gray-600">
-                        Mental health, substance abuse, therapy, psychiatry
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
+              <Heart className="h-5 w-5 text-gray-600" />
             </div>
-          </RadioGroup>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Primary Care</p>
+              <p className="text-sm text-gray-600">
+                Family medicine, internal medicine, pediatrics, etc.
+              </p>
+            </div>
+          </div>
+
+          <div
+            onClick={() => handleTypeChange("behavioral")}
+            className={`flex items-start space-x-3 p-4 border rounded-md min-h-[80px] cursor-pointer transition-colors ${
+              data?.type === "behavioral" ? "border-blue-500 ring-2 ring-blue-500" : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-gray-100">
+              <Brain className="h-5 w-5 text-gray-600" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium text-gray-900">Behavioral Health</p>
+              <p className="text-sm text-gray-600">
+                Mental health, substance abuse, therapy, psychiatry
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
