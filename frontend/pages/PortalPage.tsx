@@ -15,18 +15,12 @@ import {
   CheckCircle,
   Upload,
 } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 
 export function PortalPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Track file + status
-  const [file, setFile] = useState<File | null>(null);
-  const [status, setStatus] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-
-  // 1) Loading guard
   if (loading) {
     return (
       <div className="p-6">
@@ -35,49 +29,12 @@ export function PortalPage() {
     );
   }
 
-  // 2) Not logged in → bounce to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Mock data - replace later
+  // Mock data – replace later
   const uploadedDocsCount = 0;
-
-  async function handleUpload(e: React.FormEvent) {
-    e.preventDefault();
-    if (!file) return;
-    setUploading(true);
-    setStatus(null);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("userEmail", user?.email || "");
-      formData.append("businessName", user?.businessName || "");
-
-      const resp = await fetch(
-        "https://api.ecrofmedia.xyz:5678/webhook/uploading-doc",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!resp.ok) throw new Error("Upload failed");
-
-      const result = await resp.json();
-      if (result.success) {
-        setStatus("✅ Document uploaded to SharePoint successfully");
-      } else {
-        setStatus("⚠️ Upload failed, please try again");
-      }
-    } catch (err) {
-      setStatus("❌ Error uploading document");
-    } finally {
-      setUploading(false);
-      setFile(null);
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -123,8 +80,11 @@ export function PortalPage() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Documents Card with Upload */}
-        <Card className="hover:shadow-md transition-shadow">
+        {/* Documents Card – now links to dedicated upload page */}
+        <Card
+          className="hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => navigate("/documents")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Documents</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -132,45 +92,39 @@ export function PortalPage() {
           <CardContent>
             <div className="text-2xl font-bold">{uploadedDocsCount}</div>
             <p className="text-xs text-muted-foreground mb-3">
-              Uploaded documents
+              Manage and upload provider documents
             </p>
-
-            <form onSubmit={handleUpload} className="space-y-2">
-              <input
-                type="file"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                className="text-sm"
-              />
-              <Button
-                type="submit"
-                size="sm"
-                className="w-full bg-black hover:bg-gray-800 text-white"
-                disabled={uploading || !file}
-              >
-                <Upload className="h-3 w-3 mr-1" />
-                {uploading ? "Uploading..." : "Upload Document"}
-              </Button>
-            </form>
-
-            {status && (
-              <p className="text-xs mt-2 text-gray-600 whitespace-pre-line">
-                {status}
-              </p>
-            )}
+            <Button
+              size="sm"
+              className="w-full bg-gray-500 hover:bg-gray-600 text-white"
+            >
+              <Upload className="h-3 w-3 mr-1" />
+              Upload Documents
+            </Button>
           </CardContent>
         </Card>
 
+        {/* Messages */}
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Messages</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">Coming soon</p>
+            <iframe
+              src="https://api.ecrofmediaco.com/widget/form/b75H76Mxa96eArrM1dN5"
+              style={{
+                width: "100%",
+                height: "300px",
+                border: "none",
+                borderRadius: "3px",
+              }}
+              title="Portal Messages"
+            ></iframe>
           </CardContent>
         </Card>
 
+        {/* Settings */}
         <Card
           className="hover:shadow-md transition-shadow cursor-pointer"
           onClick={() => navigate("/settings")}
@@ -180,8 +134,10 @@ export function PortalPage() {
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">Account settings</p>
+            <div className="text-2xl font-bold">⚙️</div>
+            <p className="text-xs text-muted-foreground">
+              Update your account settings
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -216,7 +172,10 @@ export function PortalPage() {
               >
                 → Start Credentialing
               </div>
-              <div className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
+              <div
+                className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
+                onClick={() => navigate("/documents")}
+              >
                 → Upload Documents
               </div>
               <div
@@ -235,5 +194,6 @@ export function PortalPage() {
     </div>
   );
 }
+
 
 

@@ -8,14 +8,11 @@ import React, {
 import { supabase, isSupabaseReady } from "../utils/supabase";
 import { MOCK_AUTH } from "../utils/featureFlags";
 
-type Role = "admin" | "client";
-type AppUser = {
+export type UserRole = "admin" | "client"; // ✅ Exported so other files can use
+export type AppUser = {
   id: string;
   email: string;
-  role: Role;
-  firstName?: string;
-  lastName?: string;
-  businessName?: string;
+  role: UserRole;
   onboardingComplete?: boolean;
 };
 
@@ -72,19 +69,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    const role = (session.user.user_metadata?.role as Role) || "client";
+    const role = (session.user.user_metadata?.role as UserRole) || "client";
     const onboardingComplete = !!session.user.user_metadata?.onboardingComplete;
-    const firstName = session.user.user_metadata?.firstName;
-    const lastName = session.user.user_metadata?.lastName;
-    const businessName = session.user.user_metadata?.businessName;
 
     setUser({
       id: session.user.id,
       email: session.user.email ?? "",
       role,
-      firstName,
-      lastName,
-      businessName,
       onboardingComplete,
     });
   }
@@ -92,23 +83,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Login handler
   async function loginWithEmail(email: string, password: string) {
     if (MOCK_AUTH || !isSupabaseReady) {
-      // Mock mode login
-      const role: Role = email.includes("admin") ? "admin" : "client";
-      const fakeUser: AppUser = { 
-        id: "mock-id", 
-        email, 
-        role, 
-        firstName: "John",
-        lastName: "Doe",
-        businessName: "Test Business",
-        onboardingComplete: false 
-      };
+      const role: UserRole = email.includes("admin") ? "admin" : "client";
+      const fakeUser: AppUser = { id: "mock-id", email, role, onboardingComplete: false };
       localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(fakeUser));
       setUser(fakeUser);
       return;
     }
 
-    // Real Supabase login
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -162,4 +143,5 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
   return ctx;
 }
+
 
