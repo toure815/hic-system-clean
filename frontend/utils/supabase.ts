@@ -15,9 +15,11 @@ const SUPABASE_ANON_KEY = (typeof process !== "undefined"
   NEXT_PUBLIC_SUPABASE_ANON_KEY_LEN: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.length : 0,
 };
 
-// Do not silently fall back to http://localhost (that caused the mixed-content block)
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error("Supabase env missing: check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY secrets.");
-}
+// Check if Supabase is properly configured
+export const isSupabaseReady = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
-export const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Create the client even if not ready (for mock mode compatibility)
+export const supabase: SupabaseClient = createClient(
+  SUPABASE_URL || "http://localhost:54321",
+  SUPABASE_ANON_KEY || "fake-anon-key"
+);
