@@ -1,20 +1,9 @@
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { supabase, isSupabaseReady } from "../utils/supabase";
 import { MOCK_AUTH } from "../utils/featureFlags";
 
-export type UserRole = "admin" | "client"; // ✅ Exported so other files can use
-export type AppUser = {
-  id: string;
-  email: string;
-  role: UserRole;
-  onboardingComplete?: boolean;
-};
+type Role = "admin" | "client";
+type AppUser = { id: string; email: string; role: Role };
 
 type AuthContextValue = {
   user: AppUser | null;
@@ -28,79 +17,60 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const MOCK_STORAGE_KEY = "mock_user";
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Handle session / mock setup on mount
+  // On load, either attach to Supabase session or use mock storage
   useEffect(() => {
     (async () => {
       if (MOCK_AUTH || !isSupabaseReady) {
-        // Restore mock session if available
         const raw = localStorage.getItem(MOCK_STORAGE_KEY);
         if (raw) setUser(JSON.parse(raw));
         setLoading(false);
         return;
       }
 
-      // Restore Supabase session
       const { data } = await supabase.auth.getSession();
       applySession(data.session);
       setLoading(false);
 
-      // Subscribe to auth state changes
-      const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
         applySession(session);
       });
-
-      return () => {
-        sub.subscription.unsubscribe();
-      };
+      return () => sub.subscription.unsubscribe();
     })();
   }, []);
 
-  function applySession(
-    session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]
-  ) {
+  function applySession(session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) {
     if (!session?.user) {
       setUser(null);
       return;
     }
-
-    const role = (session.user.user_metadata?.role as UserRole) || "client";
-    const onboardingComplete = !!session.user.user_metadata?.onboardingComplete;
-
-    setUser({
-      id: session.user.id,
-      email: session.user.email ?? "",
-      role,
-      onboardingComplete,
-    });
+    const role = (session.user.user_metadata?.role as Role) || "client";
+    setUser({ id: session.user.id, email: session.user.email ?? "", role });
   }
 
-  // Login handler
-  async function loginWithEmail(email: string, password: string) {
+  const loginWithEmail = async (email: string, password: string) => {
+    // MOCK path
     if (MOCK_AUTH || !isSupabaseReady) {
-      const role: UserRole = email.includes("admin") ? "admin" : "client";
-      const fakeUser: AppUser = { id: "mock-id", email, role, onboardingComplete: false };
-      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(fakeUser));
-      setUser(fakeUser);
+      // ⚠️ Dev-only: accept anything and set role based on email
+      const mock: AppUser = {
+        id: "mock-" + Math.random().toString(36).slice(2),
+        email,
+        role: email.toLowerCase().includes("admin") ? "admin" : "client",
+      };
+      localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(mock));
+      setUser(mock);
       return;
     }
 
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
+    // REAL Supabase path
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    applySession(data.session);
-  }
+  };
 
-  // Logout handler
-  async function logout() {
+  const logout = async () => {
     if (MOCK_AUTH || !isSupabaseReady) {
       localStorage.removeItem(MOCK_STORAGE_KEY);
       setUser(null);
@@ -108,40 +78,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     await supabase.auth.signOut();
     setUser(null);
-  }
+  };
 
-  // Get token for API calls
-  async function getIdToken(): Promise<string | null> {
-    if (MOCK_AUTH || !isSupabaseReady) {
-      return "mock-token";
-    }
+  const getIdToken = async () => {
+    if (MOCK_AUTH || !isSupabaseReady) return null; // no backend token in mock mode
     const { data } = await supabase.auth.getSession();
     return data.session?.access_token ?? null;
-  }
+  };
 
-  const value = useMemo(
-    () => ({
-      user,
-      loading,
-      loginWithEmail,
-      logout,
-      getIdToken,
-    }),
-    [user, loading]
-  );
-
-  return (
-    <AuthContext.Provider value={value}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+  const value = useMemo(() => ({ user, loading, loginWithEmail, logout, getIdToken }), [user, loading]);
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Hook for using auth
-export function useAuth() {
+export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
   return ctx;
-}
+};
 
-
+// Legacy exports for compatibility
+export type UserRole = Role;
+export { type AppUser as AuthUser };

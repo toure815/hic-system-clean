@@ -11,7 +11,6 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
   const { user, loading } = useAuth();
   const location = useLocation();
 
-  // 1. Still loading → show spinner
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -20,17 +19,15 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     );
   }
 
-  // 2. Not logged in → redirect to login and preserve current location
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // 3. User logged in but role not allowed → redirect accordingly
   if (!allowedRoles.includes(user.role)) {
+    // Redirect to appropriate page based on role
     const redirectPath = user.role === "client" ? "/portal" : "/dashboard";
     return <Navigate to={redirectPath} replace />;
   }
 
-  // 4. Authorized → render children
   return <>{children}</>;
 }

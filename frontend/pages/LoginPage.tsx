@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { MOCK_AUTH } from "../utils/featureFlags";
 
 export function LoginPage() {
   const { loginWithEmail, user, loading } = useAuth();
@@ -9,6 +10,7 @@ export function LoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // If auth is still initializing, avoid flicker
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
@@ -17,6 +19,7 @@ export function LoginPage() {
     );
   }
 
+  // Redirect if already logged in
   if (user) {
     const redirectPath = user.role === "admin" ? "/dashboard" : "/portal";
     return <Navigate to={redirectPath} replace />;
@@ -28,6 +31,8 @@ export function LoginPage() {
     setError(null);
     try {
       await loginWithEmail(email, password);
+      // After login, AuthContext updates `user` and this component re-renders,
+      // triggering the <Navigate /> redirect above.
     } catch (err: any) {
       setError(err.message || "Login failed");
     } finally {
@@ -39,69 +44,46 @@ export function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6">
-        <h1 className="text-2xl font-bold text-center mb-2">Sign in</h1>
-        <p className="text-center text-gray-600 mb-6">
-          Enter your email and password to access your account
-        </p>
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-bold text-center mb-6">Sign in</h1>
+
+        {MOCK_AUTH && (
+          <div className="mb-4 rounded-md border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800">
+            Mock auth is ON – any email/password will sign in (emails with “admin” get admin role).
+          </div>
+        )}
 
         <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              type="email"
-              placeholder="Enter your email"
-              required
-              autoComplete="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              placeholder="Enter your password"
-              required
-              autoComplete="current-password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-            />
-            <div className="text-sm mt-1">
-              <a href="#" className="text-blue-600 hover:underline">
-                Forgot password?
-              </a>
-            </div>
-          </div>
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="Email"
+            required
+            autoComplete="email"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            placeholder="Password"
+            required
+            autoComplete="current-password"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
 
           {error && <div className="text-red-600 text-sm">{error}</div>}
 
           <button
             disabled={!canSubmit}
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-black text-white py-2 px-4 rounded-lg hover:bg-gray-900 disabled:bg-black disabled:text-white disabled:opacity-70"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
           >
-            <span>↪</span> {submitting ? "Signing in..." : "Sign in"}
+            {submitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
-
-        {/* Redirect link */}
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <Link to="/signup" className="text-blue-600 hover:underline">
-            Create one
-          </Link>
-        </p>
       </div>
     </div>
   );
 }
-
-
