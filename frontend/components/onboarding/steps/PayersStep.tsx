@@ -1,7 +1,9 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Building } from "lucide-react";
 
 interface PayersData {
@@ -20,7 +22,7 @@ interface PayersStepProps {
   isLoading: boolean;
 }
 
-const COMMERCIAL_PAYERS = [
+const PREDEFINED_COMMERCIAL_PAYERS = [
   "Aetna",
   "Anthem",
   "Blue Cross Blue Shield",
@@ -30,7 +32,6 @@ const COMMERCIAL_PAYERS = [
   "Molina Healthcare",
   "UnitedHealth Group",
   "Wellcare",
-  "Other"
 ];
 
 export function PayersStep({
@@ -47,6 +48,21 @@ export function PayersStep({
     medicaid: false,
     commercialPayers: [],
   };
+
+  const [otherPayerText, setOtherPayerText] = useState('');
+  const [isOtherChecked, setIsOtherChecked] = useState(false);
+
+  useEffect(() => {
+    const predefinedSet = new Set(PREDEFINED_COMMERCIAL_PAYERS);
+    const customPayer = currentData.commercialPayers.find(p => !predefinedSet.has(p));
+    if (customPayer) {
+        setIsOtherChecked(true);
+        setOtherPayerText(customPayer);
+    } else {
+        setIsOtherChecked(false);
+        setOtherPayerText('');
+    }
+  }, [currentData.commercialPayers]);
 
   const handleMedicareChange = (checked: boolean) => {
     onChange({
@@ -70,6 +86,33 @@ export function PayersStep({
     onChange({
       ...currentData,
       commercialPayers: updatedPayers,
+    });
+  };
+
+  const handleOtherCheckboxChange = (checked: boolean) => {
+    setIsOtherChecked(checked);
+    if (!checked) {
+        const predefinedSet = new Set(PREDEFINED_COMMERCIAL_PAYERS);
+        const updatedPayers = currentData.commercialPayers.filter(p => predefinedSet.has(p));
+        onChange({
+            ...currentData,
+            commercialPayers: updatedPayers,
+        });
+    }
+  };
+
+  const handleOtherPayerTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newText = e.target.value;
+    setOtherPayerText(newText);
+
+    const predefinedSet = new Set(PREDEFINED_COMMERCIAL_PAYERS);
+    const updatedPayers = currentData.commercialPayers.filter(p => predefinedSet.has(p));
+    if (newText.trim()) {
+        updatedPayers.push(newText.trim());
+    }
+    onChange({
+        ...currentData,
+        commercialPayers: updatedPayers,
     });
   };
 
@@ -119,7 +162,7 @@ export function PayersStep({
             </p>
             
             <div className="grid grid-cols-2 gap-3">
-              {COMMERCIAL_PAYERS.map((payer) => (
+              {PREDEFINED_COMMERCIAL_PAYERS.map((payer) => (
                 <div key={payer} className="flex items-center space-x-2">
                   <Checkbox
                     id={`payer-${payer}`}
@@ -131,6 +174,27 @@ export function PayersStep({
                   </Label>
                 </div>
               ))}
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="payer-other"
+                  checked={isOtherChecked}
+                  onCheckedChange={handleOtherCheckboxChange}
+                />
+                <Label htmlFor="payer-other" className="text-sm font-medium">
+                  Other
+                </Label>
+              </div>
+              {isOtherChecked && (
+                <div className="pl-6 mt-2">
+                  <Input
+                    placeholder="Enter payer name"
+                    value={otherPayerText}
+                    onChange={handleOtherPayerTextChange}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
