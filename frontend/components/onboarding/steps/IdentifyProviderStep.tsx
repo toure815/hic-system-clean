@@ -83,17 +83,17 @@ export function IdentifyProviderStep({
                         Link to Existing Provider
                       </Label>
                       <p className="text-sm text-gray-600">
-                        I want to link to an existing provider record
+                        I’ve already been credentialed before and may be reconnecting my record
                       </p>
                     </div>
                   </div>
                   
                   {data?.type === "existing" && (
                     <div className="mt-4 ml-8">
-                      <Label htmlFor="provider-id">Provider ID</Label>
+                      <Label htmlFor="provider-id">Provider ID (if available)</Label>
                       <Input
                         id="provider-id"
-                        placeholder="Enter existing provider ID"
+                        placeholder="Enter Provider ID (optional)"
                         value={data.existingProviderId || ""}
                         onChange={(e) => handleProviderIdChange(e.target.value)}
                         className="mt-1"
