@@ -10,7 +10,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CustomCalendarCaption } from "@/components/ui/CustomCalendarCaption";
 
 interface BusinessProfileData {
   businessName: string;
@@ -133,22 +132,25 @@ export function BusinessProfileStep({
             <div className="space-y-2">
               <Label htmlFor="dateOfBirth">Date of Birth *</Label>
               <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full justify-start text-left font-normal",
-                      !currentData.dateOfBirth && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dateOfBirthAsDate ? format(dateOfBirthAsDate, "PPP") : <span>Pick a date</span>}
-                  </Button>
-                </PopoverTrigger>
+                <div className="relative">
+                  <Input
+                    id="dateOfBirth"
+                    type="text"
+                    placeholder="YYYY-MM-DD"
+                    value={currentData.dateOfBirth}
+                    onChange={(e) => handleChange({ dateOfBirth: e.target.value })}
+                    className="pr-10"
+                  />
+                  <PopoverTrigger asChild>
+                    <Button variant={"ghost"} size="icon" className="absolute right-0 top-0 h-full w-10">
+                      <CalendarIcon className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                </div>
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    components={{ Caption: CustomCalendarCaption }}
+                    captionLayout="dropdown-buttons"
                     fromYear={1930}
                     toYear={new Date().getFullYear()}
                     selected={dateOfBirthAsDate}

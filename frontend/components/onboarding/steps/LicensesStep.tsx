@@ -8,7 +8,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { CustomCalendarCaption } from "@/components/ui/CustomCalendarCaption";
 
 interface License {
   state: string;
@@ -136,22 +135,24 @@ export function LicensesStep({
                   <div className="space-y-2">
                     <Label>Expiration Date</Label>
                     <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !license.expirationDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {expirationDateAsDate ? format(expirationDateAsDate, "PPP") : <span>Pick a date</span>}
-                        </Button>
-                      </PopoverTrigger>
+                      <div className="relative">
+                        <Input
+                          type="text"
+                          placeholder="YYYY-MM-DD"
+                          value={license.expirationDate}
+                          onChange={(e) => updateLicense(index, "expirationDate", e.target.value)}
+                          className="pr-10"
+                        />
+                        <PopoverTrigger asChild>
+                          <Button variant={"ghost"} size="icon" className="absolute right-0 top-0 h-full w-10">
+                            <CalendarIcon className="h-4 w-4" />
+                          </Button>
+                        </PopoverTrigger>
+                      </div>
                       <PopoverContent className="w-auto p-0">
                         <Calendar
                           mode="single"
-                          components={{ Caption: CustomCalendarCaption }}
+                          captionLayout="dropdown-buttons"
                           fromYear={new Date().getFullYear()}
                           toYear={new Date().getFullYear() + 20}
                           selected={expirationDateAsDate}
