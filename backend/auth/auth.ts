@@ -19,11 +19,10 @@ function verifySupabaseAuth(authHeader?: string) {
   return { userId: payload.sub, email: payload.email };
 }
 
-const auth = authHandler<AuthParams, AuthData>(
+export const auth = authHandler<AuthParams, AuthData>(
   async (data) => {
     const authResult = verifySupabaseAuth(data.authorization);
     
-    // Look up user in our local database using Supabase user ID
     const user = await authDB.queryRow`
       SELECT id, email, role, first_name, last_name, is_active, supabase_id
       FROM users 

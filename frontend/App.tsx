@@ -5,9 +5,10 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ProtectedOnboardingRoute } from "./components/ProtectedOnboardingRoute"; // <-- NEW
 import { Header } from "./components/Header";
 import { LoginPage } from "./pages/LoginPage";
-import { SignupPage } from "./pages/SignupPage";   // <-- NEW
+import { SignupPage } from "./pages/SignupPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
+import { DocumentsPage } from "./pages/DocumentsPage";
 import { OnboardingStartPage } from "./pages/OnboardingStartPage";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -40,6 +41,14 @@ export default function App() {
                   element={
                     <ProtectedRoute allowedRoles={["client"]}>
                       <PortalPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/documents"
+                  element={
+                    <ProtectedRoute allowedRoles={["client"]}>
+                      <DocumentsPage />
                     </ProtectedRoute>
                   }
                 />

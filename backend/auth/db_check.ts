@@ -31,7 +31,7 @@ export const dbCheck = api<void, DbCheckResponse>(
 
       return { tables, usersCount };
     } catch (e: any) {
-      throw APIError.internal("DB check failed", { details: e?.message ?? String(e) });
+      throw APIError.internal("DB check failed: " + (e?.message ?? String(e)));
     }
   }
 );
