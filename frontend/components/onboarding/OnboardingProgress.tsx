@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import type { OnboardingStep } from "../../types/onboarding";
+import { useEffect, useRef } from "react";
 
 interface OnboardingProgressProps {
   steps: OnboardingStep[];
@@ -18,6 +19,27 @@ const STEP_LABELS: Record<OnboardingStep, string> = {
 };
 
 export function OnboardingProgress({ steps, currentStepIndex }: OnboardingProgressProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const activeStepRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current && activeStepRef.current) {
+      const container = scrollContainerRef.current;
+      const activeStep = activeStepRef.current;
+      
+      const containerWidth = container.offsetWidth;
+      const activeStepLeft = activeStep.offsetLeft;
+      const activeStepWidth = activeStep.offsetWidth;
+
+      const scrollLeft = activeStepLeft - (containerWidth / 2) + (activeStepWidth / 2);
+      
+      container.scrollTo({
+        left: scrollLeft,
+        behavior: 'smooth',
+      });
+    }
+  }, [currentStepIndex]);
+
   return (
     <div className="w-full">
       {/* Mobile View: Scrollable horizontal bar */}
@@ -25,14 +47,18 @@ export function OnboardingProgress({ steps, currentStepIndex }: OnboardingProgre
         <p className="text-sm font-medium text-gray-700 mb-2">
           Step {currentStepIndex + 1} of {steps.length}: {STEP_LABELS[steps[currentStepIndex]]}
         </p>
-        <div className="overflow-x-auto pb-4 -mb-4">
+        <div ref={scrollContainerRef} className="overflow-x-auto pb-4 -mb-4">
           <div className="flex items-start space-x-4" style={{ minWidth: 'max-content' }}>
             {steps.map((step, index) => {
               const isCompleted = index < currentStepIndex;
               const isCurrent = index === currentStepIndex;
 
               return (
-                <div key={step} className="flex flex-col items-center w-24 shrink-0">
+                <div 
+                  key={step} 
+                  ref={isCurrent ? activeStepRef : null}
+                  className="flex flex-col items-center w-24 shrink-0"
+                >
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center border-2 shrink-0 ${
                       isCompleted
