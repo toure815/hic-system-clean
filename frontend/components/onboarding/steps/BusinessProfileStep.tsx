@@ -5,7 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface BusinessProfileData {
   businessName: string;
@@ -67,23 +71,23 @@ export function BusinessProfileStep({
     (currentData.additionalLocations?.length || 0) > 0
   );
 
-  const handleChange = (field: keyof Omit<BusinessProfileData, 'additionalLocations'>, value: string) => {
-    onChange({ ...currentData, [field]: value });
+  const handleChange = (updates: Partial<BusinessProfileData>) => {
+    onChange({ ...currentData, ...updates });
   };
 
   const handleAdditionalLocationChange = (index: number, value: string) => {
     const newLocations = [...currentData.additionalLocations];
     newLocations[index] = value;
-    onChange({ ...currentData, additionalLocations: newLocations });
+    handleChange({ additionalLocations: newLocations });
   };
 
   const addAdditionalLocation = () => {
-    onChange({ ...currentData, additionalLocations: [...currentData.additionalLocations, ""] });
+    handleChange({ additionalLocations: [...currentData.additionalLocations, ""] });
   };
 
   const removeAdditionalLocation = (index: number) => {
     const newLocations = currentData.additionalLocations.filter((_, i) => i !== index);
-    onChange({ ...currentData, additionalLocations: newLocations });
+    handleChange({ additionalLocations: newLocations });
   };
 
   const isValid = 
@@ -100,6 +104,8 @@ export function BusinessProfileStep({
     currentData.caqh &&
     currentData.hoursOfOperation;
 
+  const dateOfBirthAsDate = currentData.dateOfBirth ? new Date(currentData.dateOfBirth.replace(/-/g, '/')) : undefined;
+
   return (
     <div className="space-y-6">
       <Card>
@@ -113,23 +119,49 @@ export function BusinessProfileStep({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="businessName">Business Name *</Label>
-              <Input id="businessName" value={currentData.businessName} onChange={(e) => handleChange("businessName", e.target.value)} placeholder="Your Company LLC" />
+              <Input id="businessName" value={currentData.businessName} onChange={(e) => handleChange({ businessName: e.target.value })} placeholder="Your Company LLC" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="providerName">Provider Name (Full Legal Name) *</Label>
-              <Input id="providerName" value={currentData.providerName} onChange={(e) => handleChange("providerName", e.target.value)} placeholder="Dr. Jane Doe" />
+              <Input id="providerName" value={currentData.providerName} onChange={(e) => handleChange({ providerName: e.target.value })} placeholder="Dr. Jane Doe" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="ssn">Social Security Number (SSN) *</Label>
-              <Input id="ssn" value={currentData.ssn} onChange={(e) => handleChange("ssn", e.target.value)} placeholder="XXX-XX-XXXX" />
+              <Input id="ssn" value={currentData.ssn} onChange={(e) => handleChange({ ssn: e.target.value })} placeholder="XXX-XX-XXXX" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="dateOfBirth">Date of Birth *</Label>
-              <Input id="dateOfBirth" type="date" value={currentData.dateOfBirth} onChange={(e) => handleChange("dateOfBirth", e.target.value)} />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !currentData.dateOfBirth && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateOfBirthAsDate ? format(dateOfBirthAsDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    captionLayout="dropdown-buttons"
+                    fromYear={1930}
+                    toYear={new Date().getFullYear()}
+                    selected={dateOfBirthAsDate}
+                    onSelect={(date) =>
+                      handleChange({ dateOfBirth: date ? format(date, "yyyy-MM-dd") : "" })
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="primaryAddress">Primary Business Address *</Label>
-              <Textarea id="primaryAddress" value={currentData.primaryAddress} onChange={(e) => handleChange("primaryAddress", e.target.value)} placeholder="123 Main St, Anytown, USA 12345" />
+              <Textarea id="primaryAddress" value={currentData.primaryAddress} onChange={(e) => handleChange({ primaryAddress: e.target.value })} placeholder="123 Main St, Anytown, USA 12345" />
             </div>
             
             <div className="md:col-span-2 space-y-4">
@@ -169,43 +201,43 @@ export function BusinessProfileStep({
 
             <div className="space-y-2">
               <Label htmlFor="einNumber">EIN Number (Tax ID) *</Label>
-              <Input id="einNumber" value={currentData.einNumber} onChange={(e) => handleChange("einNumber", e.target.value)} placeholder="XX-XXXXXXX" />
+              <Input id="einNumber" value={currentData.einNumber} onChange={(e) => handleChange({ einNumber: e.target.value })} placeholder="XX-XXXXXXX" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="npiNumber">Individual NPI Number *</Label>
-              <Input id="npiNumber" value={currentData.npiNumber} onChange={(e) => handleChange("npiNumber", e.target.value)} placeholder="1234567890" />
+              <Input id="npiNumber" value={currentData.npiNumber} onChange={(e) => handleChange({ npiNumber: e.target.value })} placeholder="1234567890" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="groupNpiNumber">Group NPI Number (if applicable)</Label>
-              <Input id="groupNpiNumber" value={currentData.groupNpiNumber || ""} onChange={(e) => handleChange("groupNpiNumber", e.target.value)} placeholder="10-digit number" />
+              <Input id="groupNpiNumber" value={currentData.groupNpiNumber || ""} onChange={(e) => handleChange({ groupNpiNumber: e.target.value })} placeholder="10-digit number" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="countyOfBusiness">County of Business *</Label>
-              <Input id="countyOfBusiness" value={currentData.countyOfBusiness} onChange={(e) => handleChange("countyOfBusiness", e.target.value)} placeholder="Any County" />
+              <Input id="countyOfBusiness" value={currentData.countyOfBusiness} onChange={(e) => handleChange({ countyOfBusiness: e.target.value })} placeholder="Any County" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="businessPhoneNumber">Business Phone Number *</Label>
-              <Input id="businessPhoneNumber" type="tel" value={currentData.businessPhoneNumber} onChange={(e) => handleChange("businessPhoneNumber", e.target.value)} placeholder="(555) 555-5555" />
+              <Input id="businessPhoneNumber" type="tel" value={currentData.businessPhoneNumber} onChange={(e) => handleChange({ businessPhoneNumber: e.target.value })} placeholder="(555) 555-5555" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="businessEmail">Business Email *</Label>
-              <Input id="businessEmail" type="email" value={currentData.businessEmail} onChange={(e) => handleChange("businessEmail", e.target.value)} placeholder="contact@yourcompany.com" />
+              <Input id="businessEmail" type="email" value={currentData.businessEmail} onChange={(e) => handleChange({ businessEmail: e.target.value })} placeholder="contact@yourcompany.com" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="businessFaxNumber">Business Fax Number (Optional)</Label>
-              <Input id="businessFaxNumber" type="tel" value={currentData.businessFaxNumber || ""} onChange={(e) => handleChange("businessFaxNumber", e.target.value)} placeholder="(555) 555-5556" />
+              <Input id="businessFaxNumber" type="tel" value={currentData.businessFaxNumber || ""} onChange={(e) => handleChange({ businessFaxNumber: e.target.value })} placeholder="(555) 555-5556" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="caqh">CAQH ID *</Label>
-              <Input id="caqh" value={currentData.caqh} onChange={(e) => handleChange("caqh", e.target.value)} placeholder="Your CAQH ID" />
+              <Input id="caqh" value={currentData.caqh} onChange={(e) => handleChange({ caqh: e.target.value })} placeholder="Your CAQH ID" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="businessWebsite">Business Website (Optional)</Label>
-              <Input id="businessWebsite" type="url" value={currentData.businessWebsite || ""} onChange={(e) => handleChange("businessWebsite", e.target.value)} placeholder="https://yourcompany.com" />
+              <Input id="businessWebsite" type="url" value={currentData.businessWebsite || ""} onChange={(e) => handleChange({ businessWebsite: e.target.value })} placeholder="https://yourcompany.com" />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="hoursOfOperation">Hours of Operation *</Label>
-              <Textarea id="hoursOfOperation" value={currentData.hoursOfOperation} onChange={(e) => handleChange("hoursOfOperation", e.target.value)} placeholder="e.g., Mon-Fri, 9am - 5pm" />
+              <Textarea id="hoursOfOperation" value={currentData.hoursOfOperation} onChange={(e) => handleChange({ hoursOfOperation: e.target.value })} placeholder="e.g., Mon-Fri, 9am - 5pm" />
             </div>
           </div>
         </CardContent>

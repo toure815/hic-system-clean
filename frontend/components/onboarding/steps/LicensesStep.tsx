@@ -1,10 +1,13 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface License {
   state: string;
@@ -82,62 +85,87 @@ export function LicensesStep({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {licenses.map((license, index) => (
-            <div key={index} className="border rounded-lg p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium">License {index + 1}</h4>
-                {licenses.length > 1 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeLicense(index)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
+          {licenses.map((license, index) => {
+            const expirationDateAsDate = license.expirationDate ? new Date(license.expirationDate.replace(/-/g, '/')) : undefined;
+            return (
+              <div key={index} className="border rounded-lg p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">License {index + 1}</h4>
+                  {licenses.length > 1 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeLicense(index)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>State</Label>
+                    <Select
+                      value={license.state}
+                      onValueChange={(value) => updateLicense(index, "state", value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select state" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {US_STATES.map((state) => (
+                          <SelectItem key={state} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>License Number</Label>
+                    <Input
+                      value={license.licenseNumber}
+                      onChange={(e) => updateLicense(index, "licenseNumber", e.target.value)}
+                      placeholder="Enter license number"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Expiration Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !license.expirationDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {expirationDateAsDate ? format(expirationDateAsDate, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          captionLayout="dropdown-buttons"
+                          fromYear={new Date().getFullYear()}
+                          toYear={new Date().getFullYear() + 20}
+                          selected={expirationDateAsDate}
+                          onSelect={(date) =>
+                            updateLicense(index, "expirationDate", date ? format(date, "yyyy-MM-dd") : "")
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>State</Label>
-                  <Select
-                    value={license.state}
-                    onValueChange={(value) => updateLicense(index, "state", value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select state" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {US_STATES.map((state) => (
-                        <SelectItem key={state} value={state}>
-                          {state}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>License Number</Label>
-                  <Input
-                    value={license.licenseNumber}
-                    onChange={(e) => updateLicense(index, "licenseNumber", e.target.value)}
-                    placeholder="Enter license number"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Expiration Date</Label>
-                  <Input
-                    type="date"
-                    value={license.expirationDate}
-                    onChange={(e) => updateLicense(index, "expirationDate", e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           <Button
             variant="outline"
