@@ -91,7 +91,7 @@ export function DocumentsPage() {
       const formData = new FormData();
       formData.append("file", file);
       formData.append("userId", user.id);
-      formData.append("businessName", user.firstName || user.email || "");
+      formData.append("businessName", user?.businessName || user?.firstName || user.email || "");
 
       const response = await fetch(
         "https://api.ecrofmedia.xyz:5678/webhook/uploading-doc",

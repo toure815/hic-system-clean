@@ -15,6 +15,7 @@ type AppUser = {
   role: Role;
   firstName?: string;
   lastName?: string;
+  businessName?: string;
   onboardingComplete?: boolean;
 };
 
@@ -75,6 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const onboardingComplete = !!session.user.user_metadata?.onboardingComplete;
     const firstName = session.user.user_metadata?.firstName;
     const lastName = session.user.user_metadata?.lastName;
+    const businessName = session.user.user_metadata?.businessName;
 
     setUser({
       id: session.user.id,
@@ -82,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       role,
       firstName,
       lastName,
+      businessName,
       onboardingComplete,
     });
   }
@@ -89,6 +92,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   // Login handler
   async function loginWithEmail(email: string, password: string) {
     if (MOCK_AUTH || !isSupabaseReady) {
+      // Mock mode login
       const role: Role = email.includes("admin") ? "admin" : "client";
       const fakeUser: AppUser = { 
         id: "mock-id", 
@@ -96,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         role, 
         firstName: "John",
         lastName: "Doe",
+        businessName: "Test Business",
         onboardingComplete: false 
       };
       localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(fakeUser));
@@ -103,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
+    // Real Supabase login
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,

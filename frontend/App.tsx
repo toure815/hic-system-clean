@@ -2,15 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { ProtectedOnboardingRoute } from "./components/ProtectedOnboardingRoute"; // <-- NEW
+import { ProtectedOnboardingRoute } from "./components/ProtectedOnboardingRoute"; 
 import { Header } from "./components/Header";
 import { LoginPage } from "./pages/LoginPage";
-import { SignupPage } from "./pages/SignupPage";
+import { SignupPage } from "./pages/SignupPage";   
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
-import { DocumentsPage } from "./pages/DocumentsPage";
-import { SettingsPage } from "./pages/SettingsPage";
 import { OnboardingStartPage } from "./pages/OnboardingStartPage";
+import { MessagesPage } from "./pages/MessagesPage";   // <-- NEW
 import { Toaster } from "@/components/ui/toaster";
 
 const queryClient = new QueryClient();
@@ -46,27 +45,19 @@ export default function App() {
                   }
                 />
                 <Route
-                  path="/documents"
-                  element={
-                    <ProtectedRoute allowedRoles={["client"]}>
-                      <DocumentsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/settings"
-                  element={
-                    <ProtectedRoute allowedRoles={["client"]}>
-                      <SettingsPage />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path="/onboarding/start"
                   element={
                     <ProtectedOnboardingRoute>
                       <OnboardingStartPage />
                     </ProtectedOnboardingRoute>
+                  }
+                />
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute allowedRoles={["client"]}>
+                      <MessagesPage />
+                    </ProtectedRoute>
                   }
                 />
 
@@ -81,4 +72,3 @@ export default function App() {
     </QueryClientProvider>
   );
 }
-
