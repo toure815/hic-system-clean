@@ -152,7 +152,7 @@ export function BusinessProfileStep({
                     mode="single"
                     captionLayout="dropdown-buttons"
                     fromYear={1930}
-                    toYear={new Date().getFullYear()}
+                    toYear={new Date().getFullYear() - 18}
                     selected={dateOfBirthAsDate}
                     onSelect={(date) =>
                       handleChange({ dateOfBirth: date ? format(date, "yyyy-MM-dd") : "" })
