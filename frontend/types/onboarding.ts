@@ -4,8 +4,8 @@ export type OnboardingStep =
   | "specialty"
   | "business-profile"
   | "licenses"
-  | "required-docs"
   | "payers"
+  | "required-docs"
   | "portal-logins";
 
 export interface OnboardingStepData {
@@ -54,7 +54,6 @@ export interface OnboardingStepData {
   payers?: {
     medicare: boolean;
     medicaid: boolean;
-    bankAccountUploaded: boolean;
     commercialPayers: string[];
   };
   portalLogins?: {

@@ -9,8 +9,8 @@ const STEPS: OnboardingStep[] = [
   "specialty",
   "business-profile",
   "licenses",
-  "required-docs",
   "payers",
+  "required-docs",
   "portal-logins",
 ];
 

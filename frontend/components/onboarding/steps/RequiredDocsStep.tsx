@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useBackend } from "../../../hooks/useBackend";
 import { useToast } from "@/components/ui/use-toast";
 import { Upload, Check, FileText } from "lucide-react";
@@ -37,9 +36,15 @@ interface RequiredDocsStepProps {
 const getRequiredDocuments = (stepData: OnboardingStepData): RequiredDoc[] => {
   const docs: RequiredDoc[] = [
     {
-      type: "cv",
-      name: "Curriculum Vitae (CV)",
-      description: "Current professional CV or resume",
+      type: "resume",
+      name: "Resume",
+      description: "Current professional resume",
+      required: true,
+    },
+    {
+      type: "w9",
+      name: "W-9 Form",
+      description: "Completed and signed W-9 form",
       required: true,
     },
     {
@@ -47,6 +52,18 @@ const getRequiredDocuments = (stepData: OnboardingStepData): RequiredDoc[] => {
       name: "Malpractice Insurance",
       description: "Current malpractice insurance certificate",
       required: true,
+    },
+    {
+      type: "board-certification",
+      name: "Board Certification",
+      description: "Copy of your board certification, if applicable",
+      required: false,
+    },
+    {
+      type: "accreditation",
+      name: "Accreditation (e.g., DME, CLIA)",
+      description: "Accreditation documents, if applicable",
+      required: false,
     },
   ];
 
@@ -78,6 +95,16 @@ const getRequiredDocuments = (stepData: OnboardingStepData): RequiredDoc[] => {
       type: "facility-license",
       name: "Facility License",
       description: "Healthcare facility operating license",
+      required: true,
+    });
+  }
+
+  // Add payer-specific documents
+  if (stepData.payers?.medicare || stepData.payers?.medicaid) {
+    docs.push({
+      type: "bank-document",
+      name: "Voided Check or Bank Letter",
+      description: "Required for Medicare/Medicaid direct deposit",
       required: true,
     });
   }

@@ -13,9 +13,10 @@ export type OnboardingStep =
   | "identify-provider"
   | "practice-type" 
   | "specialty"
+  | "business-profile"
   | "licenses"
-  | "required-docs"
   | "payers"
+  | "required-docs"
   | "portal-logins";
 
 export interface OnboardingStepData {
@@ -28,6 +29,24 @@ export interface OnboardingStepData {
   };
   specialty?: {
     type: "primary-care" | "behavioral";
+  };
+  businessProfile?: {
+    businessName: string;
+    providerName: string;
+    ssn: string;
+    dateOfBirth: string;
+    primaryAddress: string;
+    additionalLocations: string[];
+    einNumber: string;
+    npiNumber: string;
+    groupNpiNumber?: string;
+    countyOfBusiness: string;
+    businessPhoneNumber: string;
+    businessEmail: string;
+    businessFaxNumber?: string;
+    caqh: string;
+    hoursOfOperation: string;
+    businessWebsite?: string;
   };
   licenses?: {
     licenses: Array<{
@@ -46,7 +65,6 @@ export interface OnboardingStepData {
   payers?: {
     medicare: boolean;
     medicaid: boolean;
-    bankAccountUploaded: boolean;
     commercialPayers: string[];
   };
   portalLogins?: {
