@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { CustomCalendarCaption } from "@/components/ui/CustomCalendarCaption";
 
 interface BusinessProfileData {
   businessName: string;
@@ -147,7 +148,7 @@ export function BusinessProfileStep({
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    captionLayout="dropdown-buttons"
+                    components={{ Caption: CustomCalendarCaption }}
                     fromYear={1930}
                     toYear={new Date().getFullYear()}
                     selected={dateOfBirthAsDate}

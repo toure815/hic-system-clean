@@ -8,6 +8,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Plus, Trash2, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { CustomCalendarCaption } from "@/components/ui/CustomCalendarCaption";
 
 interface License {
   state: string;
@@ -150,7 +151,7 @@ export function LicensesStep({
                       <PopoverContent className="w-auto p-0">
                         <Calendar
                           mode="single"
-                          captionLayout="dropdown-buttons"
+                          components={{ Caption: CustomCalendarCaption }}
                           fromYear={new Date().getFullYear()}
                           toYear={new Date().getFullYear() + 20}
                           selected={expirationDateAsDate}
