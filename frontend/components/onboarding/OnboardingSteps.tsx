@@ -1,6 +1,7 @@
 import { IdentifyProviderStep } from "./steps/IdentifyProviderStep";
 import { PracticeTypeStep } from "./steps/PracticeTypeStep";
 import { SpecialtyStep } from "./steps/SpecialtyStep";
+import { BusinessProfileStep } from "./steps/BusinessProfileStep";
 import { LicensesStep } from "./steps/LicensesStep";
 import { RequiredDocsStep } from "./steps/RequiredDocsStep";
 import { PayersStep } from "./steps/PayersStep";
@@ -64,6 +65,14 @@ export function OnboardingSteps({
         <SpecialtyStep
           data={stepData.specialty}
           onChange={(data) => onStepChange({ specialty: data })}
+          {...commonProps}
+        />
+      );
+    case "business-profile":
+      return (
+        <BusinessProfileStep
+          data={stepData.businessProfile}
+          onChange={(data) => onStepChange({ businessProfile: data })}
           {...commonProps}
         />
       );

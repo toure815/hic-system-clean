@@ -7,6 +7,7 @@ const STEPS: OnboardingStep[] = [
   "identify-provider",
   "practice-type",
   "specialty",
+  "business-profile",
   "licenses",
   "required-docs",
   "payers",

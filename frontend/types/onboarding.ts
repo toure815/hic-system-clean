@@ -2,6 +2,7 @@ export type OnboardingStep =
   | "identify-provider"
   | "practice-type" 
   | "specialty"
+  | "business-profile"
   | "licenses"
   | "required-docs"
   | "payers"
@@ -17,6 +18,22 @@ export interface OnboardingStepData {
   };
   specialty?: {
     type: "primary-care" | "behavioral";
+  };
+  businessProfile?: {
+    businessName: string;
+    providerName: string;
+    ssn: string;
+    dateOfBirth: string;
+    businessAddress: string;
+    einNumber: string;
+    npiNumber: string;
+    countyOfBusiness: string;
+    businessPhoneNumber: string;
+    businessEmail: string;
+    businessFaxNumber: string;
+    caqh: string;
+    hoursOfOperation: string;
+    businessWebsite: string;
   };
   licenses?: {
     licenses: Array<{

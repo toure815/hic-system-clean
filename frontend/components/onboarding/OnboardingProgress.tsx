@@ -10,6 +10,7 @@ const STEP_LABELS: Record<OnboardingStep, string> = {
   "identify-provider": "Identify Provider",
   "practice-type": "Practice Type",
   "specialty": "Specialty",
+  "business-profile": "Business Profile",
   "licenses": "Licenses",
   "required-docs": "Required Documents",
   "payers": "Payers",
