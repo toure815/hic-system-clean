@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import backend from "~backend/client";
+import { supabase } from "../lib/supabase";
 
 interface ForgotPasswordDialogProps {
   open: boolean;
@@ -22,7 +22,12 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
     setIsLoading(true);
 
     try {
-      await backend.auth.forgotPassword({ email });
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      
+      if (error) {
+        throw error;
+      }
+
       setIsSubmitted(true);
       toast({
         title: "Reset link sent",
@@ -32,7 +37,7 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
       console.error("Forgot password error:", error);
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {

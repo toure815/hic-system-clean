@@ -1,6 +1,5 @@
 import { useAuth } from "../contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CreateUserDialog } from "../components/CreateUserDialog";
 import { Users, Shield, Briefcase } from "lucide-react";
 
 export function DashboardPage() {
@@ -12,11 +11,9 @@ export function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1">
-            Welcome back, {user?.firstName}! Here's what's happening.
+            Welcome back, {user?.firstName || user?.email}! Here's what's happening.
           </p>
         </div>
-        
-        {user?.role === "admin" && <CreateUserDialog />}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
