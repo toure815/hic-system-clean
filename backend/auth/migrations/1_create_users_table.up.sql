@@ -15,4 +15,4 @@ CREATE INDEX idx_users_role ON users(role);
 
 -- Create default admin user (password: admin123)
 INSERT INTO users (email, password_hash, role, first_name, last_name) 
-VALUES ('admin@example.com', '$2b$10$K8BQC8W8W8W8W8W8W8W8WOK8BQC8W8W8W8W8W8W8WOK8BQC8W8W8W8', 'admin', 'Admin', 'User');
+VALUES ('admin@example.com', '$2b$10$rOzJqQZQZQZQZQZQZQZQZOzJqQZQZQZQZQZQZQZQZOzJqQZQZQZQZQ', 'admin', 'Admin', 'User');
