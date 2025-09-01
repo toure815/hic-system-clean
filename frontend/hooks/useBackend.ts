@@ -7,7 +7,9 @@ export function useBackend() {
   const withAuth = async () => {
     const token = await getIdToken();
     if (!token) return backend; // unauthenticated
-    return backend.with({ auth: token });
+    return backend.with({ 
+      auth: { authorization: `Bearer ${token}` }
+    });
   };
 
   // expose both plain and authed modes
