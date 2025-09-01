@@ -96,6 +96,7 @@ export interface ClientOptions {
  */
 import { createAdmin as api_auth_create_admin_createAdmin } from "~backend/auth/create_admin";
 import { createUser as api_auth_create_user_createUser } from "~backend/auth/create_user";
+import { dbCheck as api_auth_db_check_dbCheck } from "~backend/auth/db_check";
 import { forgotPassword as api_auth_forgot_password_forgotPassword } from "~backend/auth/forgot_password";
 import { login as api_auth_login_login } from "~backend/auth/login";
 import { me as api_auth_me_me } from "~backend/auth/me";
@@ -110,6 +111,7 @@ export namespace auth {
             this.baseClient = baseClient
             this.createAdmin = this.createAdmin.bind(this)
             this.createUser = this.createUser.bind(this)
+            this.dbCheck = this.dbCheck.bind(this)
             this.forgotPassword = this.forgotPassword.bind(this)
             this.login = this.login.bind(this)
             this.me = this.me.bind(this)
@@ -132,6 +134,15 @@ export namespace auth {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI(`/auth/users`, {method: "POST", body: JSON.stringify(params)})
             return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_create_user_createUser>
+        }
+
+        /**
+         * Checks database status and returns table information.
+         */
+        public async dbCheck(): Promise<ResponseType<typeof api_auth_db_check_dbCheck>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/auth/db-check`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_db_check_dbCheck>
         }
 
         /**
