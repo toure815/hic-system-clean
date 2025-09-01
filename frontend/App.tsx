@@ -6,6 +6,7 @@ import { Header } from "./components/Header";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
+import { OnboardingStartPage } from "./pages/OnboardingStartPage";
 import { Toaster } from "@/components/ui/toaster";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,14 @@ export default function App() {
                   element={
                     <ProtectedRoute allowedRoles={["client"]}>
                       <PortalPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/onboarding/start"
+                  element={
+                    <ProtectedRoute allowedRoles={["client"]}>
+                      <OnboardingStartPage />
                     </ProtectedRoute>
                   }
                 />

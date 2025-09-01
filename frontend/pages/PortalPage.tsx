@@ -1,9 +1,12 @@
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Calendar, MessageSquare, Settings } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FileText, Calendar, MessageSquare, Settings, CheckCircle } from "lucide-react";
 
 export function PortalPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="space-y-6">
@@ -13,6 +16,36 @@ export function PortalPage() {
           Welcome, {user?.firstName || user?.email}! Access your account information and services.
         </p>
       </div>
+
+      {/* Primary CTA Card */}
+      <Card className="border-blue-200 bg-blue-50">
+        <CardHeader>
+          <div className="flex items-center space-x-3">
+            <CheckCircle className="h-8 w-8 text-blue-600" />
+            <div>
+              <CardTitle className="text-xl text-blue-900">Start Your Credentialing Process</CardTitle>
+              <CardDescription className="text-blue-700">
+                Complete your provider credentialing in just a few simple steps
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <p className="text-sm text-blue-800">
+              Our streamlined onboarding process will guide you through providing all the necessary 
+              information and documentation for credentialing with healthcare plans and networks.
+            </p>
+            <Button 
+              onClick={() => navigate("/onboarding/start")}
+              size="lg"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Start Credentialing
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="hover:shadow-md transition-shadow cursor-pointer">

@@ -34,6 +34,7 @@ const BROWSER = typeof globalThis === "object" && ("window" in globalThis);
  */
 export class Client {
     public readonly auth: auth.ServiceClient
+    public readonly onboarding: onboarding.ServiceClient
     private readonly options: ClientOptions
     private readonly target: string
 
@@ -49,6 +50,7 @@ export class Client {
         this.options = options ?? {}
         const base = new BaseClient(this.target, this.options)
         this.auth = new auth.ServiceClient(base)
+        this.onboarding = new onboarding.ServiceClient(base)
     }
 
     /**
@@ -146,6 +148,65 @@ export namespace auth {
             // Now make the actual call to the API
             const resp = await this.baseClient.callTypedAPI(`/auth/sync-user`, {method: "POST", body: JSON.stringify(params)})
             return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_sync_user_syncUser>
+        }
+    }
+}
+
+/**
+ * Import the endpoint handlers to derive the types for the client.
+ */
+import { completeOnboarding as api_onboarding_complete_onboarding_completeOnboarding } from "~backend/onboarding/complete_onboarding";
+import { getDraft as api_onboarding_get_draft_getDraft } from "~backend/onboarding/get_draft";
+import { saveDraft as api_onboarding_save_draft_saveDraft } from "~backend/onboarding/save_draft";
+import { uploadDocument as api_onboarding_upload_document_uploadDocument } from "~backend/onboarding/upload_document";
+
+export namespace onboarding {
+
+    export class ServiceClient {
+        private baseClient: BaseClient
+
+        constructor(baseClient: BaseClient) {
+            this.baseClient = baseClient
+            this.completeOnboarding = this.completeOnboarding.bind(this)
+            this.getDraft = this.getDraft.bind(this)
+            this.saveDraft = this.saveDraft.bind(this)
+            this.uploadDocument = this.uploadDocument.bind(this)
+        }
+
+        /**
+         * Completes the onboarding process and creates the client record.
+         */
+        public async completeOnboarding(params: RequestType<typeof api_onboarding_complete_onboarding_completeOnboarding>): Promise<ResponseType<typeof api_onboarding_complete_onboarding_completeOnboarding>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/onboarding/complete`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_onboarding_complete_onboarding_completeOnboarding>
+        }
+
+        /**
+         * Gets the current onboarding draft for the authenticated user.
+         */
+        public async getDraft(): Promise<ResponseType<typeof api_onboarding_get_draft_getDraft>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/onboarding/draft`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_onboarding_get_draft_getDraft>
+        }
+
+        /**
+         * Saves or updates the onboarding draft for the authenticated user.
+         */
+        public async saveDraft(params: RequestType<typeof api_onboarding_save_draft_saveDraft>): Promise<ResponseType<typeof api_onboarding_save_draft_saveDraft>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/onboarding/draft`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_onboarding_save_draft_saveDraft>
+        }
+
+        /**
+         * Uploads a document for the onboarding process.
+         */
+        public async uploadDocument(params: RequestType<typeof api_onboarding_upload_document_uploadDocument>): Promise<ResponseType<typeof api_onboarding_upload_document_uploadDocument>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/onboarding/upload`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_onboarding_upload_document_uploadDocument>
         }
     }
 }
