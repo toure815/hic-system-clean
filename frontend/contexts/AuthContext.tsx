@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "../lib/supabase";
+import { useBackend } from "../hooks/useBackend";
 import type { User } from "@supabase/supabase-js";
 
 export type UserRole = "admin" | "staff" | "client";
@@ -37,40 +38,51 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getUserRole = async (authUser: User): Promise<UserRole> => {
+  const syncUserWithBackend = async (authUser: User) => {
     try {
-      // First try to get role from public.users table
-      const { data, error } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', authUser.id)
-        .single();
+      // Get the backend client with auth
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) return null;
 
-      if (!error && data?.role) {
-        return data.role as UserRole;
-      }
+      const authenticatedBackend = backend.with({
+        auth: { authorization: `Bearer ${session.access_token}` }
+      });
 
-      // Fallback to user_metadata.role
-      return (authUser.user_metadata?.role as UserRole) || 'client';
+      // Sync user data with backend
+      const backendUser = await authenticatedBackend.auth.syncUser({
+        email: authUser.email!,
+        firstName: authUser.user_metadata?.first_name,
+        lastName: authUser.user_metadata?.last_name,
+      });
+
+      return {
+        id: authUser.id,
+        email: authUser.email!,
+        role: backendUser.role as UserRole,
+        firstName: backendUser.firstName,
+        lastName: backendUser.lastName,
+      };
     } catch (error) {
-      console.error('Error fetching user role:', error);
-      return 'client';
+      console.error('Error syncing user with backend:', error);
+      // Fallback to Supabase user data
+      return {
+        id: authUser.id,
+        email: authUser.email!,
+        role: (authUser.user_metadata?.role as UserRole) || 'client',
+        firstName: authUser.user_metadata?.first_name,
+        lastName: authUser.user_metadata?.last_name,
+      };
     }
   };
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        getUserRole(session.user).then((role) => {
-          setUser({
-            id: session.user.id,
-            email: session.user.email!,
-            role,
-            firstName: session.user.user_metadata?.first_name,
-            lastName: session.user.user_metadata?.last_name,
-          });
-        });
+        const userData = await syncUserWithBackend(session.user);
+        if (userData) {
+          setUser(userData);
+        }
       }
       setIsLoading(false);
     });
@@ -80,14 +92,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        const role = await getUserRole(session.user);
-        setUser({
-          id: session.user.id,
-          email: session.user.email!,
-          role,
-          firstName: session.user.user_metadata?.first_name,
-          lastName: session.user.user_metadata?.last_name,
-        });
+        const userData = await syncUserWithBackend(session.user);
+        if (userData) {
+          setUser(userData);
+        }
       } else {
         setUser(null);
       }
@@ -108,14 +116,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     if (data.user) {
-      const role = await getUserRole(data.user);
-      setUser({
-        id: data.user.id,
-        email: data.user.email!,
-        role,
-        firstName: data.user.user_metadata?.first_name,
-        lastName: data.user.user_metadata?.last_name,
-      });
+      const userData = await syncUserWithBackend(data.user);
+      if (userData) {
+        setUser(userData);
+      }
     }
   };
 

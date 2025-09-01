@@ -94,13 +94,10 @@ export interface ClientOptions {
 /**
  * Import the endpoint handlers to derive the types for the client.
  */
-import { createAdmin as api_auth_create_admin_createAdmin } from "~backend/auth/create_admin";
-import { createUser as api_auth_create_user_createUser } from "~backend/auth/create_user";
 import { dbCheck as api_auth_db_check_dbCheck } from "~backend/auth/db_check";
-import { forgotPassword as api_auth_forgot_password_forgotPassword } from "~backend/auth/forgot_password";
-import { login as api_auth_login_login } from "~backend/auth/login";
+import { listUsers as api_auth_list_users_listUsers } from "~backend/auth/list_users";
 import { me as api_auth_me_me } from "~backend/auth/me";
-import { resetPassword as api_auth_reset_password_resetPassword } from "~backend/auth/reset_password";
+import { syncUser as api_auth_sync_user_syncUser } from "~backend/auth/sync_user";
 
 export namespace auth {
 
@@ -109,31 +106,10 @@ export namespace auth {
 
         constructor(baseClient: BaseClient) {
             this.baseClient = baseClient
-            this.createAdmin = this.createAdmin.bind(this)
-            this.createUser = this.createUser.bind(this)
             this.dbCheck = this.dbCheck.bind(this)
-            this.forgotPassword = this.forgotPassword.bind(this)
-            this.login = this.login.bind(this)
+            this.listUsers = this.listUsers.bind(this)
             this.me = this.me.bind(this)
-            this.resetPassword = this.resetPassword.bind(this)
-        }
-
-        /**
-         * Creates the default admin user if it doesn't exist.
-         */
-        public async createAdmin(): Promise<ResponseType<typeof api_auth_create_admin_createAdmin>> {
-            // Now make the actual call to the API
-            const resp = await this.baseClient.callTypedAPI(`/auth/create-admin`, {method: "POST", body: undefined})
-            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_create_admin_createAdmin>
-        }
-
-        /**
-         * Creates a new user (admin only).
-         */
-        public async createUser(params: RequestType<typeof api_auth_create_user_createUser>): Promise<ResponseType<typeof api_auth_create_user_createUser>> {
-            // Now make the actual call to the API
-            const resp = await this.baseClient.callTypedAPI(`/auth/users`, {method: "POST", body: JSON.stringify(params)})
-            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_create_user_createUser>
+            this.syncUser = this.syncUser.bind(this)
         }
 
         /**
@@ -146,19 +122,12 @@ export namespace auth {
         }
 
         /**
-         * Initiates password reset process.
+         * Lists all users (admin only).
          */
-        public async forgotPassword(params: RequestType<typeof api_auth_forgot_password_forgotPassword>): Promise<void> {
-            await this.baseClient.callTypedAPI(`/auth/forgot-password`, {method: "POST", body: JSON.stringify(params)})
-        }
-
-        /**
-         * Authenticates a user with email and password.
-         */
-        public async login(params: RequestType<typeof api_auth_login_login>): Promise<ResponseType<typeof api_auth_login_login>> {
+        public async listUsers(): Promise<ResponseType<typeof api_auth_list_users_listUsers>> {
             // Now make the actual call to the API
-            const resp = await this.baseClient.callTypedAPI(`/auth/login`, {method: "POST", body: JSON.stringify(params)})
-            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_login_login>
+            const resp = await this.baseClient.callTypedAPI(`/auth/users`, {method: "GET", body: undefined})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_list_users_listUsers>
         }
 
         /**
@@ -171,10 +140,12 @@ export namespace auth {
         }
 
         /**
-         * Resets user password using a valid token.
+         * Syncs or creates a user record from Supabase authentication.
          */
-        public async resetPassword(params: RequestType<typeof api_auth_reset_password_resetPassword>): Promise<void> {
-            await this.baseClient.callTypedAPI(`/auth/reset-password`, {method: "POST", body: JSON.stringify(params)})
+        public async syncUser(params: RequestType<typeof api_auth_sync_user_syncUser>): Promise<ResponseType<typeof api_auth_sync_user_syncUser>> {
+            // Now make the actual call to the API
+            const resp = await this.baseClient.callTypedAPI(`/auth/sync-user`, {method: "POST", body: JSON.stringify(params)})
+            return JSON.parse(await resp.text(), dateReviver) as ResponseType<typeof api_auth_sync_user_syncUser>
         }
     }
 }

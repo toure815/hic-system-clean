@@ -1,9 +1,22 @@
 import { useAuth } from "../contexts/AuthContext";
+import { useBackend } from "../hooks/useBackend";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Shield, Briefcase } from "lucide-react";
 
 export function DashboardPage() {
   const { user } = useAuth();
+  const backend = useBackend();
+
+  const { data: usersData } = useQuery({
+    queryKey: ["users"],
+    queryFn: () => backend.auth.listUsers(),
+    enabled: user?.role === "admin",
+  });
+
+  const totalUsers = usersData?.users?.length || 0;
+  const staffCount = usersData?.users?.filter(u => u.role === "staff").length || 0;
+  const clientCount = usersData?.users?.filter(u => u.role === "client").length || 0;
 
   return (
     <div className="space-y-6">
@@ -23,7 +36,7 @@ export function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold">{totalUsers}</div>
             <p className="text-xs text-muted-foreground">
               Active users in the system
             </p>
@@ -36,7 +49,7 @@ export function DashboardPage() {
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold">{staffCount}</div>
             <p className="text-xs text-muted-foreground">
               Active staff accounts
             </p>
@@ -49,7 +62,7 @@ export function DashboardPage() {
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
+            <div className="text-2xl font-bold">{clientCount}</div>
             <p className="text-xs text-muted-foreground">
               Active client accounts
             </p>

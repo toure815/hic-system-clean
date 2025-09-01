@@ -12,7 +12,7 @@ export const me = api<void, User>(
     const user = await authDB.queryRow`
       SELECT id, email, role, first_name, last_name, is_active, created_at, updated_at
       FROM users 
-      WHERE id = ${auth.userID}
+      WHERE supabase_id = ${auth.userID}
     `;
 
     if (!user) {
