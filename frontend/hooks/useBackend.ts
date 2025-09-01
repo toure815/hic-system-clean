@@ -1,21 +1,15 @@
-import { useAuth } from "../contexts/AuthContext";
 import backend from "~backend/client";
+import { useAuth } from "../contexts/AuthContext";
 
-// Returns the backend client configured with authentication.
 export function useBackend() {
-  const { user, getIdToken } = useAuth();
-  
-  if (!user) {
-    return backend;
-  }
+  const { getIdToken } = useAuth();
 
-  return backend.with({
-    auth: async () => {
-      const token = await getIdToken();
-      if (!token) {
-        throw new Error("No valid session");
-      }
-      return { authorization: `Bearer ${token}` };
-    }
-  });
+  const withAuth = async () => {
+    const token = await getIdToken();
+    if (!token) return backend; // unauthenticated
+    return backend.with({ auth: token });
+  };
+
+  // expose both plain and authed modes
+  return Object.assign(backend, { withAuth });
 }
