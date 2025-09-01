@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { supabase } from "../utils/supabase";
 
 type Role = "admin" | "client";
@@ -26,25 +27,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Read the current session on load
   useEffect(() => {
+    let unsub: (() => void) | undefined;
+
     (async () => {
-      const { data } = await supabase.auth.getSession();
-      applySession(data.session);
+      const { data, error } = await supabase.auth.getSession();
+      if (error) console.error("getSession error:", error);
+      applySession(data?.session ?? null);
       setLoading(false);
+
+      // Listen to future auth changes
+      const sub = supabase.auth.onAuthStateChange((_event, session) => {
+        applySession(session);
+      });
+
+      // Normalized unsubscribe for v2
+      unsub = () => sub.data?.subscription?.unsubscribe?.();
     })();
 
-    // Listen to future auth changes
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      applySession(session);
-    });
-    return () => sub.subscription.unsubscribe();
+    return () => { unsub?.(); };
   }, []);
 
-  function applySession(session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) {
+  function applySession(session: Session | null) {
     if (!session?.user) {
       setUser(null);
       return;
     }
-    // You can attach roles via user metadata in Supabase. Fallback to "client".
+    // Role from user metadata; default to "client"
     const role = (session.user.user_metadata?.role as Role) || "client";
     setUser({
       id: session.user.id,
@@ -54,18 +62,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const loginWithEmail = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-    // onAuthStateChange will update context
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      // onAuthStateChange will update user
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } finally {
+      setUser(null);
+    }
   };
 
   const getIdToken = async () => {
-    const { data } = await supabase.auth.getSession();
+    const { data, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error("getSession error:", error);
+      return null;
+    }
     return data.session?.access_token ?? null;
   };
 
