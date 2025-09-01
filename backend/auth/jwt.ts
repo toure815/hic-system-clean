@@ -2,12 +2,13 @@ import jwt from "jsonwebtoken";
 import { APIError } from "encore.dev/api";
 import { secret } from "encore.dev/config";
 
-const supabaseJwtSecret = secret("SupabaseJWTSecret");
+// ✅ Match the name you already have in Encore secrets
+const jwtSecret = secret("JWTSecret");
 
 export function verifyToken(token: string) {
-  const secretValue = supabaseJwtSecret();
+  const secretValue = jwtSecret();
   if (!secretValue) {
-    throw APIError.internal("Missing Supabase JWT secret");
+    throw APIError.internal("Missing JWT secret");
   }
 
   try {
@@ -20,3 +21,4 @@ export function verifyToken(token: string) {
     throw APIError.unauthenticated("Invalid or expired token");
   }
 }
+
