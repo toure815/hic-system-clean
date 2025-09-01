@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getSupabase } from "../utils/supabase";
+import { supabase } from "../utils/supabase";
 
 type Role = "admin" | "client";
 
@@ -27,21 +27,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Read the current session on load
   useEffect(() => {
     (async () => {
-      const supabase = getSupabase();
       const { data } = await supabase.auth.getSession();
       applySession(data.session);
       setLoading(false);
     })();
 
     // Listen to future auth changes
-    const supabase = getSupabase();
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       applySession(session);
     });
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  function applySession(session: Awaited<ReturnType<typeof getSupabase>>["auth"]["getSession"] extends Promise<infer T> ? T["data"]["session"] : never) {
+  function applySession(session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) {
     if (!session?.user) {
       setUser(null);
       return;
@@ -56,20 +54,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const loginWithEmail = async (email: string, password: string) => {
-    const supabase = getSupabase();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     // onAuthStateChange will update context
   };
 
   const logout = async () => {
-    const supabase = getSupabase();
     await supabase.auth.signOut();
     setUser(null);
   };
 
   const getIdToken = async () => {
-    const supabase = getSupabase();
     const { data } = await supabase.auth.getSession();
     return data.session?.access_token ?? null;
   };

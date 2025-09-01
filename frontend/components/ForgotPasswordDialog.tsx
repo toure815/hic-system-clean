@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
-import { getSupabase } from "../utils/supabase";
+import { supabase } from "../utils/supabase";
 
 interface ForgotPasswordDialogProps {
   open: boolean;
@@ -22,7 +22,6 @@ export function ForgotPasswordDialog({ open, onOpenChange }: ForgotPasswordDialo
     setIsLoading(true);
 
     try {
-      const supabase = getSupabase();
       const { error } = await supabase.auth.resetPasswordForEmail(email);
       
       if (error) {
