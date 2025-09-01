@@ -1,133 +1,67 @@
-import { useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import { ForgotPasswordDialog } from "../components/ForgotPasswordDialog";
-import { Eye, EyeOff } from "lucide-react";
 
 export function LoginPage() {
-  const { user, loginWithEmail } = useAuth();
-  const { toast } = useToast();
-  const location = useLocation();
-  
+  const { loginWithEmail, user } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Redirect if already logged in
   if (user) {
-    const from = location.state?.from?.pathname;
-    if (from) {
-      return <Navigate to={from} replace />;
-    }
-    
-    // Default redirect based on role
-    const redirectPath = user.role === "client" ? "/portal" : "/dashboard";
+    const redirectPath = user.role === "admin" ? "/dashboard" : "/portal";
     return <Navigate to={redirectPath} replace />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
+    setSubmitting(true);
+    setError(null);
     try {
       await loginWithEmail(email, password);
-      toast({
-        title: "Login successful",
-        description: "Welcome back!",
-      });
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast({
-        title: "Login failed",
-        description: error.message || "Invalid email or password",
-        variant: "destructive",
-      });
+      // Navigation will happen automatically via auth context changes
+    } catch (err: any) {
+      setError(err.message || "Login failed");
     } finally {
-      setIsLoading(false);
+      setSubmitting(false);
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign in</CardTitle>
-          <CardDescription className="text-center">
-            Enter your email and password to access your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  disabled={isLoading}
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={isLoading}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <Button
-              variant="link"
-              className="text-sm text-blue-600 hover:text-blue-800"
-              onClick={() => setShowForgotPassword(true)}
-            >
-              Forgot your password?
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <ForgotPasswordDialog
-        open={showForgotPassword}
-        onOpenChange={setShowForgotPassword}
-      />
+      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-2xl font-bold text-center mb-6">Sign in</h1>
+        
+        <form onSubmit={onSubmit} className="space-y-4">
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            placeholder="Email"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            type="password"
+            placeholder="Password"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {error && <div className="text-red-600 text-sm">{error}</div>}
+          <button 
+            disabled={submitting} 
+            type="submit" 
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+          >
+            {submitting ? "Signing in..." : "Sign in"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
