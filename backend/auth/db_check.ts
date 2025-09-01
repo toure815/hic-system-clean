@@ -11,7 +11,7 @@ export const dbCheck = api<void, DbCheckResponse>(
   {
     method: "GET",
     path: "/auth/db-check",
-    auth: true,
+    auth: false,
     expose: true,
   },
   async () => {
