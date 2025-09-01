@@ -1,126 +1,62 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "../lib/supabase";
-import backend from "~backend/client";
-import type { User } from "@supabase/supabase-js";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { supabase } from "../utils/supabase";
 
-export type UserRole = "admin" | "staff" | "client";
+type Role = "admin" | "client";
 
-interface AuthUser {
+type AppUser = {
   id: string;
   email: string;
-  role: UserRole;
-  firstName?: string;
-  lastName?: string;
-}
+  role: Role;
+};
 
-interface AuthContextType {
-  user: AuthUser | null;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
-  isLoading: boolean;
-}
+type AuthContextValue = {
+  user: AppUser | null;
+  loading: boolean;
+  loginWithEmail: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  /** Returns the Supabase access token for backend calls */
+  getIdToken: () => Promise<string | null>;
+};
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-}
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<AppUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const syncUserWithBackend = async (authUser: User) => {
-    try {
-      // Get the backend client with auth
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) return null;
-
-      const authenticatedBackend = backend.with({
-        auth: { authorization: `Bearer ${session.access_token}` }
-      });
-
-      // Sync user data with backend
-      const backendUser = await authenticatedBackend.auth.syncUser({
-        email: authUser.email!,
-        firstName: authUser.user_metadata?.first_name,
-        lastName: authUser.user_metadata?.last_name,
-      });
-
-      return {
-        id: authUser.id,
-        email: authUser.email!,
-        role: backendUser.role as UserRole,
-        firstName: backendUser.firstName,
-        lastName: backendUser.lastName,
-      };
-    } catch (error) {
-      console.error('Error syncing user with backend:', error);
-      // Fallback to Supabase user data
-      return {
-        id: authUser.id,
-        email: authUser.email!,
-        role: (authUser.user_metadata?.role as UserRole) || 'client',
-        firstName: authUser.user_metadata?.first_name,
-        lastName: authUser.user_metadata?.last_name,
-      };
-    }
-  };
-
+  // Read the current session on load
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const userData = await syncUserWithBackend(session.user);
-        if (userData) {
-          setUser(userData);
-        }
-      }
-      setIsLoading(false);
-    });
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      applySession(data.session);
+      setLoading(false);
+    })();
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        const userData = await syncUserWithBackend(session.user);
-        if (userData) {
-          setUser(userData);
-        }
-      } else {
-        setUser(null);
-      }
-      setIsLoading(false);
+    // Listen to future auth changes
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      applySession(session);
     });
-
-    return () => subscription.unsubscribe();
+    return () => sub.subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+  function applySession(session: Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]) {
+    if (!session?.user) {
+      setUser(null);
+      return;
+    }
+    // You can attach roles via user metadata in Supabase. Fallback to "client".
+    const role = (session.user.user_metadata?.role as Role) || "client";
+    setUser({
+      id: session.user.id,
+      email: session.user.email ?? "",
+      role,
     });
+  }
 
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    if (data.user) {
-      const userData = await syncUserWithBackend(data.user);
-      if (userData) {
-        setUser(userData);
-      }
-    }
+  const loginWithEmail = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    // onAuthStateChange will update context
   };
 
   const logout = async () => {
@@ -128,9 +64,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
-      {children}
-    </AuthContext.Provider>
+  const getIdToken = async () => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
+  };
+
+  const value = useMemo(
+    () => ({ user, loading, loginWithEmail, logout, getIdToken }),
+    [user, loading]
   );
-}
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  return ctx;
+};
+
+// Legacy exports for compatibility
+export type UserRole = Role;
+export { type AppUser as AuthUser };

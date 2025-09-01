@@ -3,7 +3,7 @@ import backend from "~backend/client";
 
 // Returns the backend client configured with authentication.
 export function useBackend() {
-  const { user } = useAuth();
+  const { user, getIdToken } = useAuth();
   
   if (!user) {
     return backend;
@@ -11,11 +11,11 @@ export function useBackend() {
 
   return backend.with({
     auth: async () => {
-      const { data: { session } } = await import("../lib/supabase").then(m => m.supabase.auth.getSession());
-      if (!session?.access_token) {
+      const token = await getIdToken();
+      if (!token) {
         throw new Error("No valid session");
       }
-      return { authorization: `Bearer ${session.access_token}` };
+      return { authorization: `Bearer ${token}` };
     }
   });
 }

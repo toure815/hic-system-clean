@@ -10,7 +10,7 @@ import { ForgotPasswordDialog } from "../components/ForgotPasswordDialog";
 import { Eye, EyeOff } from "lucide-react";
 
 export function LoginPage() {
-  const { user, login } = useAuth();
+  const { user, loginWithEmail } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
   
@@ -37,7 +37,7 @@ export function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      await loginWithEmail(email, password);
       toast({
         title: "Login successful",
         description: "Welcome back!",

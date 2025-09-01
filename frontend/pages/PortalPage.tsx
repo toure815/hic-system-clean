@@ -16,7 +16,7 @@ export function PortalPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Client Portal</h1>
         <p className="text-gray-600 mt-1">
-          Welcome, {user?.firstName || user?.email}! Access your account information and services.
+          Welcome, {user?.email}! Access your account information and services.
         </p>
       </div>
 
