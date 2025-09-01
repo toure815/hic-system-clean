@@ -1,30 +1,25 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Support both Vite and Next style envs so we never get stuck
-const viteEnv = (import.meta as any)?.env || {};
+// Prefer Vite envs; fall back to Next-style if present.
+const viteEnv = (import.meta as any).env || {};
 const supabaseUrl =
   viteEnv.VITE_SUPABASE_URL ||
-  (typeof process !== "undefined" ? process.env.NEXT_PUBLIC_SUPABASE_URL : "");
+  (typeof process !== "undefined" ? (process as any).env?.NEXT_PUBLIC_SUPABASE_URL : undefined);
 
 const supabaseAnonKey =
   viteEnv.VITE_SUPABASE_ANON_KEY ||
-  (typeof process !== "undefined" ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : "");
+  (typeof process !== "undefined" ? (process as any).env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined);
 
-// Guard + helpful console output
+// Helpful debug if something is still missing (doesn't print actual keys)
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error("Supabase env missing", {
-    urlPresent: !!supabaseUrl,
-    keyLen: supabaseAnonKey?.length ?? 0,
-    using: {
-      VITE_SUPABASE_URL: !!viteEnv.VITE_SUPABASE_URL,
-      VITE_SUPABASE_ANON_KEY: !!viteEnv.VITE_SUPABASE_ANON_KEY,
-      NEXT_PUBLIC_SUPABASE_URL:
-        typeof process !== "undefined" ? !!process.env.NEXT_PUBLIC_SUPABASE_URL : false,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY:
-        typeof process !== "undefined" ? !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : false,
-    },
+    VITE_SUPABASE_URL: !!viteEnv.VITE_SUPABASE_URL,
+    VITE_SUPABASE_ANON_KEY: (viteEnv.VITE_SUPABASE_ANON_KEY || "").length,
+    NEXT_PUBLIC_SUPABASE_URL: !!(typeof process !== "undefined" && (process as any).env?.NEXT_PUBLIC_SUPABASE_URL),
+    NEXT_PUBLIC_SUPABASE_ANON_KEY:
+      ((typeof process !== "undefined" && (process as any).env?.NEXT_PUBLIC_SUPABASE_ANON_KEY) || "").length,
   });
-  throw new Error("Missing VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY (or NEXT_PUBLIC_*)");
+  throw new Error("Missing Supabase envs. Set VITE_* (for Vite) or NEXT_PUBLIC_* (for Next).");
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
