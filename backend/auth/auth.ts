@@ -1,11 +1,8 @@
 import { Header, APIError, Gateway } from "encore.dev/api";
 import { authHandler } from "encore.dev/auth";
-import { secret } from "encore.dev/config";
-import jwt from "jsonwebtoken";
 import { authDB } from "./db";
+import { verifyToken } from "./jwt";
 import type { AuthData } from "./types";
-
-const supabaseJwtSecret = secret("SupabaseJWTSecret");
 
 interface AuthParams {
   authorization?: Header<"Authorization">;
@@ -16,16 +13,8 @@ function verifySupabaseAuth(authHeader?: string) {
     throw APIError.unauthenticated("Missing or invalid Authorization header");
   }
 
-  const secretValue = supabaseJwtSecret();
-  if (!secretValue) {
-    throw APIError.internal("Server missing SUPABASE_JWT_SECRET");
-  }
-
   const token = authHeader.slice(7);
-  const payload = jwt.verify(token, secretValue) as {
-    sub: string; 
-    email?: string;
-  };
+  const payload = verifyToken(token);
 
   return { userId: payload.sub, email: payload.email };
 }

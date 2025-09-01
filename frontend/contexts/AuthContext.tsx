@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "../lib/supabase";
-import { useBackend } from "../hooks/useBackend";
+import backend from "~backend/client";
 import type { User } from "@supabase/supabase-js";
 
 export type UserRole = "admin" | "staff" | "client";
