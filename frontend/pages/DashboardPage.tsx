@@ -3,7 +3,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Users, Shield, Briefcase } from "lucide-react";
 
 export function DashboardPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  // 1) Loading guard (prevents flicker/undefined)
+  if (loading) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-semibold">Loading your dashboard…</h1>
+      </div>
+    );
+  }
+
+  // 2) Not logged in guard
+  if (!user) {
+    return (
+      <div className="p-6 space-y-2">
+        <h1 className="text-2xl font-semibold">Please sign in</h1>
+        <p className="text-gray-600">You need to be logged in to view the dashboard.</p>
+      </div>
+    );
+  }
+
+  // 3) Safe email fallback
+  const displayEmail = user.email || "user";
 
   return (
     <div className="space-y-6">
@@ -11,7 +33,7 @@ export function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
           <p className="text-gray-600 mt-1">
-            Welcome back, {user?.email}! Here's what's happening.
+            Welcome back, {displayEmail}! Here's what's happening.
           </p>
         </div>
       </div>
@@ -24,9 +46,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">
-              Active users in the system
-            </p>
+            <p className="text-xs text-muted-foreground">Active users in the system</p>
           </CardContent>
         </Card>
 
@@ -37,9 +57,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">
-              Active staff accounts
-            </p>
+            <p className="text-xs text-muted-foreground">Active staff accounts</p>
           </CardContent>
         </Card>
 
@@ -50,9 +68,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">
-              Active client accounts
-            </p>
+            <p className="text-xs text-muted-foreground">Active client accounts</p>
           </CardContent>
         </Card>
       </div>
@@ -60,9 +76,7 @@ export function DashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Common tasks and management options
-          </CardDescription>
+          <CardDescription>Common tasks and management options</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-sm text-gray-600">
