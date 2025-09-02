@@ -1,26 +1,22 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-const viteEnv = (import.meta as any).env ?? {};
-const SUPABASE_URL: string | undefined =
-  viteEnv.VITE_SUPABASE_URL ||
-  (typeof process !== "undefined" ? (process as any).env?.NEXT_PUBLIC_SUPABASE_URL : undefined) ||
-  (typeof process !== "undefined" ? (process as any).env?.SUPABASE_URL : undefined);
+// ✅ Read ONLY the Vite envs that you configured in Leap
+const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.trim();
+const SUPABASE_ANON_KEY = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim();
 
-const SUPABASE_ANON_KEY: string | undefined =
-  viteEnv.VITE_SUPABASE_ANON_KEY ||
-  (typeof process !== "undefined" ? (process as any).env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined) ||
-  (typeof process !== "undefined" ? (process as any).env?.SUPABASE_ANON_KEY : undefined);
+// 👀 Expose what the app actually got so we can verify in the browser Console
+(window as any).__ENV = {
+  VITE_SUPABASE_URL: SUPABASE_URL ?? null,
+  VITE_SUPABASE_ANON_KEY_LEN: SUPABASE_ANON_KEY ? SUPABASE_ANON_KEY.length : 0,
+};
 
-// Instead of throwing (which kills the app), log it for debugging
+// ⚠️ Do NOT fall back to localhost. If these are missing, we want it obvious.
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error("⚠️ Supabase env not configured", {
-    url: SUPABASE_URL,
-    anonKeyLen: SUPABASE_ANON_KEY?.length ?? 0,
-  });
+  console.error("⚠️ Supabase env not configured", (window as any).__ENV);
 }
 
-// Always export a client, even if envs are broken, so the app doesn't crash
+// Create the client (will error later if envs are missing, but app still renders)
 export const supabase: SupabaseClient = createClient(
-  SUPABASE_URL || "http://localhost:54321", // dummy fallback
-  SUPABASE_ANON_KEY || "anon-key-placeholder"
+  SUPABASE_URL ?? "",
+  SUPABASE_ANON_KEY ?? ""
 );
