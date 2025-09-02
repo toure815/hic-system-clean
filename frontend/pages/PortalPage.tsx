@@ -1,22 +1,36 @@
 import { useAuth } from "../contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, MessageSquare, Settings, CheckCircle, Upload } from "lucide-react";
 
 export function PortalPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+  // 1) Loading guard
+  if (loading) {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-semibold">Loading your portal…</h1>
+      </div>
+    );
+  }
+
+  // 2) Not logged in → bounce to login (or render a message)
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   // Mock data - replace with actual data when available
-  const uploadedDocsCount = 0; // This should come from an API call
+  const uploadedDocsCount = 0;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Client Portal</h1>
         <p className="text-gray-600 mt-1">
-          Welcome, {user?.email}! Access your account information and services.
+          Welcome, {user.email || "user"}! Access your account information and services.
         </p>
       </div>
 
@@ -36,10 +50,10 @@ export function PortalPage() {
         <CardContent>
           <div className="space-y-4">
             <p className="text-sm text-blue-800">
-              Our streamlined onboarding process will guide you through providing all the necessary 
+              Our streamlined onboarding process will guide you through providing all the necessary
               information and documentation for credentialing with healthcare plans and networks.
             </p>
-            <Button 
+            <Button
               onClick={() => navigate("/onboarding/start")}
               size="lg"
               className="bg-blue-600 hover:bg-blue-700"
@@ -51,18 +65,19 @@ export function PortalPage() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/documents")}>
+        <Card
+          className="hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => navigate("/documents")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Documents</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{uploadedDocsCount}</div>
-            <p className="text-xs text-muted-foreground mb-3">
-              Uploaded documents
-            </p>
-            <Button 
-              size="sm" 
+            <p className="text-xs text-muted-foreground mb-3">Uploaded documents</p>
+            <Button
+              size="sm"
               variant="outline"
               onClick={(e) => {
                 e.stopPropagation();
@@ -83,22 +98,21 @@ export function PortalPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">
-              Coming soon
-            </p>
+            <p className="text-xs text-muted-foreground">Coming soon</p>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate("/settings")}>
+        <Card
+          className="hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => navigate("/settings")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Settings</CardTitle>
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">
-              Account settings
-            </p>
+            <p className="text-xs text-muted-foreground">Account settings</p>
           </CardContent>
         </Card>
       </div>
@@ -107,39 +121,33 @@ export function PortalPage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Your latest account activity and updates
-            </CardDescription>
+            <CardDescription>Your latest account activity and updates</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-sm text-gray-600">
-              No recent activity to display.
-            </div>
+            <div className="text-sm text-gray-600">No recent activity to display.</div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle>Quick Links</CardTitle>
-            <CardDescription>
-              Frequently accessed features and services
-            </CardDescription>
+            <CardDescription>Frequently accessed features and services</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              <div 
+              <div
                 className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
                 onClick={() => navigate("/onboarding/start")}
               >
                 → Start Credentialing
               </div>
-              <div 
+              <div
                 className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
                 onClick={() => navigate("/documents")}
               >
                 → Upload Documents
               </div>
-              <div 
+              <div
                 className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
                 onClick={() => navigate("/settings")}
               >
@@ -155,3 +163,4 @@ export function PortalPage() {
     </div>
   );
 }
+
