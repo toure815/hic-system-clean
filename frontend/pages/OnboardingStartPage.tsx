@@ -9,25 +9,28 @@ import type { OnboardingStepData, OnboardingStep } from "../types/onboarding";
 const STEPS: OnboardingStep[] = [
   "identify-provider",
   "practice-type",
-  "specialty", 
+  "specialty",
   "licenses",
   "required-docs",
   "payers",
-  "portal-logins"
+  "portal-logins",
 ];
 
 export function OnboardingStartPage() {
-  const backend = useBackend();
+  const api = useBackend();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [stepData, setStepData] = useState<OnboardingStepData>({});
 
-  // Load existing draft
+  // Load existing draft (AUTH)
   const { data: draftResponse } = useQuery({
     queryKey: ["onboarding-draft"],
-    queryFn: () => backend.onboarding.getDraft(),
+    queryFn: async () => {
+      const authed = await api.withAuth();
+      return authed.onboarding.getDraft();
+    },
   });
 
   // Initialize state from draft
@@ -36,16 +39,16 @@ export function OnboardingStartPage() {
     if (draft) {
       setStepData(draft.stepData);
       const stepIndex = STEPS.indexOf(draft.currentStep);
-      if (stepIndex >= 0) {
-        setCurrentStepIndex(stepIndex);
-      }
+      if (stepIndex >= 0) setCurrentStepIndex(stepIndex);
     }
   }, [draftResponse]);
 
-  // Save draft mutation
+  // Save draft (AUTH)
   const saveDraftMutation = useMutation({
-    mutationFn: (data: { stepData: OnboardingStepData; currentStep: OnboardingStep }) =>
-      backend.onboarding.saveDraft(data),
+    mutationFn: async (data: { stepData: OnboardingStepData; currentStep: OnboardingStep }) => {
+      const authed = await api.withAuth();
+      return authed.onboarding.saveDraft(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["onboarding-draft"] });
     },
@@ -53,16 +56,18 @@ export function OnboardingStartPage() {
       console.error("Save draft error:", error);
       toast({
         title: "Error saving progress",
-        description: error.message || "Failed to save your progress",
+        description: error?.message || "Failed to save your progress",
         variant: "destructive",
       });
     },
   });
 
-  // Complete onboarding mutation
+  // Complete onboarding (AUTH)
   const completeOnboardingMutation = useMutation({
-    mutationFn: (finalStepData: OnboardingStepData) =>
-      backend.onboarding.completeOnboarding({ finalStepData }),
+    mutationFn: async (finalStepData: OnboardingStepData) => {
+      const authed = await api.withAuth();
+      return authed.onboarding.completeOnboarding({ finalStepData });
+    },
     onSuccess: () => {
       toast({
         title: "Onboarding complete!",
@@ -74,19 +79,18 @@ export function OnboardingStartPage() {
       console.error("Complete onboarding error:", error);
       toast({
         title: "Error completing onboarding",
-        description: error.message || "Failed to complete the onboarding process",
+        description: error?.message || "Failed to complete the onboarding process",
         variant: "destructive",
       });
     },
   });
 
   const handleStepChange = (newStepData: Partial<OnboardingStepData>) => {
-    const updatedStepData = { ...stepData, ...newStepData };
-    setStepData(updatedStepData);
-    
+    const updated = { ...stepData, ...newStepData };
+    setStepData(updated);
     // Auto-save draft
     saveDraftMutation.mutate({
-      stepData: updatedStepData,
+      stepData: updated,
       currentStep: STEPS[currentStepIndex],
     });
   };
@@ -95,12 +99,7 @@ export function OnboardingStartPage() {
     if (currentStepIndex < STEPS.length - 1) {
       const nextIndex = currentStepIndex + 1;
       setCurrentStepIndex(nextIndex);
-      
-      // Save with next step
-      saveDraftMutation.mutate({
-        stepData,
-        currentStep: STEPS[nextIndex],
-      });
+      saveDraftMutation.mutate({ stepData, currentStep: STEPS[nextIndex] });
     }
   };
 
@@ -108,12 +107,7 @@ export function OnboardingStartPage() {
     if (currentStepIndex > 0) {
       const prevIndex = currentStepIndex - 1;
       setCurrentStepIndex(prevIndex);
-      
-      // Save with previous step
-      saveDraftMutation.mutate({
-        stepData,
-        currentStep: STEPS[prevIndex],
-      });
+      saveDraftMutation.mutate({ stepData, currentStep: STEPS[prevIndex] });
     }
   };
 
@@ -128,15 +122,10 @@ export function OnboardingStartPage() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Provider Credentialing</h1>
-        <p className="text-gray-600 mt-1">
-          Complete your credentialing application step by step
-        </p>
+        <p className="text-gray-600 mt-1">Complete your credentialing application step by step</p>
       </div>
 
-      <OnboardingProgress 
-        steps={STEPS}
-        currentStepIndex={currentStepIndex}
-      />
+      <OnboardingProgress steps={STEPS} currentStepIndex={currentStepIndex} />
 
       <OnboardingSteps
         currentStep={currentStep}
@@ -145,7 +134,7 @@ export function OnboardingStartPage() {
         onNext={handleNext}
         onPrevious={handlePrevious}
         onComplete={handleComplete}
-        canGoNext={true} // You might want to add validation logic here
+        canGoNext={true} // add validation later
         canGoPrevious={currentStepIndex > 0}
         isLastStep={isLastStep}
         isLoading={saveDraftMutation.isPending || completeOnboardingMutation.isPending}
