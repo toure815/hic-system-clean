@@ -6,9 +6,5 @@
   "workspaces": [
     "backend",
     "frontend"
-  ],
-  "scripts": {
-    "build": "cd frontend && bun run build",
-    "start": "cd frontend && bun run dev"
-  }
+  ]
 }
