@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Install Bun
+# Ensure Bun is installed (Render may already provide, but this forces it)
 curl -fsSL https://bun.sh/install | bash
 export PATH="$HOME/.bun/bin:$PATH"
 
-echo "Using Bun version:"
+# Print Bun version for sanity
 bun --version
 
-# Install root deps (monorepo style)
-bun install --no-save
+# Install root dependencies (monorepo)
+bun install
 
-# Build frontend
+# Build frontend explicitly
 cd frontend
-bun install --no-save
+bun install
 bun run build
