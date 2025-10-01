@@ -2,7 +2,6 @@
   "name": "frontend",
   "version": "1.0.0",
   "type": "module",
-  "packageManager": "bun",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -46,3 +45,4 @@
     "rollup": "^4.52.3"
   }
 }
+
