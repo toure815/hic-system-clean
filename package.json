@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "cd frontend && bun run dev",
     "build": "cd frontend && bun run build",
-    "start": "cd frontend && bun run preview -- --port $PORT"
+    "start": "cd frontend && bunx vite preview --host --port $PORT"
   }
 }
+
