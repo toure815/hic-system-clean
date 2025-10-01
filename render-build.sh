@@ -5,7 +5,7 @@ set -euo pipefail
 curl -fsSL https://bun.sh/install | bash
 export PATH="$HOME/.bun/bin:$PATH"
 
-# Build the Vite app in /frontend
+# Build the Vite app in /frontend (root has workspaces but no "build" script)
 cd frontend
 bun install
 bun run build
