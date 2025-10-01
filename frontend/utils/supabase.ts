@@ -1,45 +1,67 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-/**
- * Try to load Supabase environment variables from both Vite and Next.js styles.
- * This way it works whether you're deploying with Vite (import.meta.env) or Next (process.env).
- */
+// Utility function to grab env vars safely
+function getEnvVar(keys: string[]): string | undefined {
+  for (const key of keys) {
+    // Handles Vite, Next.js, Node, Encore injected vars
+    if (typeof process !== "undefined" && (process as any).env?.[key]) {
+      return (process as any).env[key];
+    }
+    if (typeof import.meta !== "undefined" && (import.meta as any).env?.[key]) {
+      return (import.meta as any).env[key];
+    }
+    if (typeof window !== "undefined" && (window as any).__ENV?.[key]) {
+      return (window as any).__ENV[key];
+    }
+  }
+  return undefined;
+}
 
-// ✅ 1. Handle Vite style (works in your current frontend)
-const VITE_URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const VITE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
+// ---- RESOLVE URL ----
+const SUPABASE_URL =
+  getEnvVar([
+    "NEXT_PUBLIC_SUPABASE_URL", // Next.js public
+    "VITE_SUPABASE_URL",        // Vite public
+    "SUPABASE_URL",             // Generic fallback
+  ]) || "";
 
-// ✅ 2. Handle Next.js style (fallback if used elsewhere in backend or preview)
-const NEXT_URL =
-  typeof process !== "undefined"
-    ? (process as any).env?.NEXT_PUBLIC_SUPABASE_URL
-    : undefined;
+// ---- RESOLVE ANON KEY ----
+const SUPABASE_ANON_KEY =
+  getEnvVar([
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "VITE_SUPABASE_ANON_KEY",
+    "SUPABASE_ANON_KEY",
+  ]) || "";
 
-const NEXT_KEY =
-  typeof process !== "undefined"
-    ? (process as any).env?.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    : undefined;
-
-// ✅ 3. Pick whichever exists (prefer Vite if available)
-const SUPABASE_URL = VITE_URL || NEXT_URL;
-const SUPABASE_ANON_KEY = VITE_KEY || NEXT_KEY;
-
-// ✅ 4. Debug log (safe masking of key)
+// Debug log to confirm what is being picked up
 console.log("🚀 Supabase ENV in use:", {
-  VITE_URL,
-  NEXT_URL,
-  FINAL_URL: SUPABASE_URL,
-  FINAL_KEY_EXISTS: SUPABASE_ANON_KEY ? "✅ yes" : "❌ missing",
+  NEXT_URL: getEnvVar(["NEXT_PUBLIC_SUPABASE_URL"]),
+  VITE_URL: getEnvVar(["VITE_SUPABASE_URL"]),
+  RAW_URL: SUPABASE_URL,
+  NEXT_KEY: getEnvVar(["NEXT_PUBLIC_SUPABASE_ANON_KEY"])?.slice(0, 6) + "...",
+  VITE_KEY: getEnvVar(["VITE_SUPABASE_ANON_KEY"])?.slice(0, 6) + "...",
+  RAW_KEY_LEN: SUPABASE_ANON_KEY.length,
 });
 
-// ✅ 5. Throw if nothing is set (no mock fallback anymore)
+// Expose env vars in browser console for quick debugging
+if (typeof window !== "undefined") {
+  (window as any).__ENV = {
+    NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL || null,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY_LEN: SUPABASE_ANON_KEY
+      ? SUPABASE_ANON_KEY.length
+      : 0,
+  };
+}
+
+// Hard fail if missing
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   throw new Error("❌ Missing Supabase environment variables!");
 }
 
-// ✅ 6. Export client and ready flag
+// Export checker
 export const isSupabaseReady = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
+// Create Supabase client
 export const supabase: SupabaseClient = createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY
