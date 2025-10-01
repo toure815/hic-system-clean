@@ -1,15 +1,17 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-// Utility function to grab env vars safely
+// Utility function to safely resolve env vars
 function getEnvVar(keys: string[]): string | undefined {
   for (const key of keys) {
-    // Handles Vite, Next.js, Node, Encore injected vars
-    if (typeof process !== "undefined" && (process as any).env?.[key]) {
-      return (process as any).env[key];
-    }
+    // Vite (import.meta.env)
     if (typeof import.meta !== "undefined" && (import.meta as any).env?.[key]) {
       return (import.meta as any).env[key];
     }
+    // Node / Encore process.env
+    if (typeof process !== "undefined" && (process as any).env?.[key]) {
+      return (process as any).env[key];
+    }
+    // Browser global injected by Encore/Leap (optional)
     if (typeof window !== "undefined" && (window as any).__ENV?.[key]) {
       return (window as any).__ENV[key];
     }
@@ -20,9 +22,9 @@ function getEnvVar(keys: string[]): string | undefined {
 // ---- RESOLVE URL ----
 const SUPABASE_URL =
   getEnvVar([
-    "VITE_SUPABASE_URL",        // Vite public
-    "NEXT_PUBLIC_SUPABASE_URL", // Next.js public
-    "SUPABASE_URL",             // Generic fallback
+    "VITE_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "SUPABASE_URL",
   ]) || "";
 
 // ---- RESOLVE ANON KEY ----
@@ -33,30 +35,26 @@ const SUPABASE_ANON_KEY =
     "SUPABASE_ANON_KEY",
   ]) || "";
 
-// 🔍 Debug log for staging
-console.log("🔍 ENV DEBUG (staging)", {
-  VITE_SUPABASE_URL: import.meta.env?.VITE_SUPABASE_URL,
-  VITE_SUPABASE_ANON_KEY: import.meta.env?.VITE_SUPABASE_ANON_KEY
-    ? "(set)"
-    : "(missing)",
-  NEXT_PUBLIC_SUPABASE_URL: process.env?.NEXT_PUBLIC_SUPABASE_URL,
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    ? "(set)"
-    : "(missing)",
-  SUPABASE_URL: process.env?.SUPABASE_URL,
-  SUPABASE_ANON_KEY: process.env?.SUPABASE_ANON_KEY ? "(set)" : "(missing)",
+// Determine environment
+const NODE_ENV =
+  getEnvVar(["VITE_NODE_ENV", "NODE_ENV", "ENCORE_ENV"]) || "unknown";
+
+// Debug log (will only show once at build/runtime)
+console.log("⚡ Supabase Env Debug:", {
+  NODE_ENV,
+  SUPABASE_URL: SUPABASE_URL ? "[ok]" : "(missing)",
+  SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? "[ok]" : "(missing)",
 });
 
-// ✅ Explicit export so AuthContext.tsx can use it
-export const isSupabaseReady: boolean = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+// Export checker
+export const isSupabaseReady = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
-// Lazy client instance
+// Lazy client init
 let _supabase: SupabaseClient | null = null;
 
 function getSupabaseClient(): SupabaseClient {
   if (!_supabase) {
     if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-      console.warn("⚠️ Supabase env vars missing. Using fallback.");
       throw new Error("❌ Missing Supabase environment variables!");
     }
     _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -64,11 +62,12 @@ function getSupabaseClient(): SupabaseClient {
   return _supabase;
 }
 
-// Proxy wrapper
-export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
+// Export proxy client
+export const supabase = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
-    return (getSupabaseClient() as any)[prop];
+    return getSupabaseClient()[prop as keyof SupabaseClient];
   },
 });
+
 
 
