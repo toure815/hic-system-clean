@@ -33,38 +33,27 @@ const SUPABASE_ANON_KEY =
     "SUPABASE_ANON_KEY",
   ]) || "";
 
-// Debug log to confirm what is being picked up
-console.log("🚀 Supabase ENV in use:", {
-  NEXT_URL: getEnvVar(["NEXT_PUBLIC_SUPABASE_URL"]),
-  VITE_URL: getEnvVar(["VITE_SUPABASE_URL"]),
-  RAW_URL: SUPABASE_URL,
-  NEXT_KEY: getEnvVar(["NEXT_PUBLIC_SUPABASE_ANON_KEY"])?.slice(0, 6) + "...",
-  VITE_KEY: getEnvVar(["VITE_SUPABASE_ANON_KEY"])?.slice(0, 6) + "...",
-  RAW_KEY_LEN: SUPABASE_ANON_KEY.length,
-});
-
-// Expose env vars in browser console for quick debugging
-if (typeof window !== "undefined") {
-  (window as any).__ENV = {
-    NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL || null,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY_LEN: SUPABASE_ANON_KEY
-      ? SUPABASE_ANON_KEY.length
-      : 0,
-  };
-}
-
-// Hard fail if missing
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  throw new Error("❌ Missing Supabase environment variables!");
-}
-
 // Export checker
 export const isSupabaseReady = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
-// Create Supabase client
-export const supabase: SupabaseClient = createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+// Create Supabase client only if env vars are present
+let _supabase: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient {
+  if (!_supabase) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      throw new Error("❌ Missing Supabase environment variables!");
+    }
+    _supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return _supabase;
+}
+
+// Export a proxy that lazily initializes the client
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(_target, prop) {
+    return getSupabaseClient()[prop as keyof SupabaseClient];
+  },
+});
 
 
