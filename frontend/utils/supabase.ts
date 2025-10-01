@@ -20,20 +20,34 @@ function getEnvVar(keys: string[]): string | undefined {
 // ---- RESOLVE URL ----
 const SUPABASE_URL =
   getEnvVar([
-    "NEXT_PUBLIC_SUPABASE_URL", // Next.js public
     "VITE_SUPABASE_URL",        // Vite public
+    "NEXT_PUBLIC_SUPABASE_URL", // Next.js public
     "SUPABASE_URL",             // Generic fallback
   ]) || "";
 
 // ---- RESOLVE ANON KEY ----
 const SUPABASE_ANON_KEY =
   getEnvVar([
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "VITE_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "SUPABASE_ANON_KEY",
   ]) || "";
 
-// ✅ Explicit export so Vite/Rollup sees it
+// 🔍 Debug log for staging
+console.log("🔍 ENV DEBUG (staging)", {
+  VITE_SUPABASE_URL: import.meta.env?.VITE_SUPABASE_URL,
+  VITE_SUPABASE_ANON_KEY: import.meta.env?.VITE_SUPABASE_ANON_KEY
+    ? "(set)"
+    : "(missing)",
+  NEXT_PUBLIC_SUPABASE_URL: process.env?.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    ? "(set)"
+    : "(missing)",
+  SUPABASE_URL: process.env?.SUPABASE_URL,
+  SUPABASE_ANON_KEY: process.env?.SUPABASE_ANON_KEY ? "(set)" : "(missing)",
+});
+
+// ✅ Explicit export so AuthContext.tsx can use it
 export const isSupabaseReady: boolean = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
 // Lazy client instance
@@ -56,4 +70,5 @@ export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
     return (getSupabaseClient() as any)[prop];
   },
 });
+
 
