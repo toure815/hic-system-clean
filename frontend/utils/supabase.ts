@@ -11,15 +11,13 @@ const SUPABASE_ANON_KEY =
     ? (process as any).env?.NEXT_PUBLIC_SUPABASE_ANON_KEY
     : undefined) as string | undefined;
 
-// 🔎 Debug: log to verify which env vars are being picked up
-console.log("🔎 Supabase ENV in use:", {
-  VITE_URL: (import.meta as any).env?.VITE_SUPABASE_URL,
-  VITE_KEY: (import.meta as any).env?.VITE_SUPABASE_ANON_KEY,
+// Debug log to verify which env vars are being picked up
+console.log("🚀 Supabase ENV in use:", {
   NEXT_URL: SUPABASE_URL,
   NEXT_KEY: SUPABASE_ANON_KEY,
 });
 
-// Expose for quick browser check
+// Expose for quick browser check (Console -> type window.__ENV)
 (typeof window !== "undefined" ? (window as any) : {}).__ENV = {
   NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL ?? null,
   NEXT_PUBLIC_SUPABASE_ANON_KEY_LEN: SUPABASE_ANON_KEY
@@ -27,12 +25,16 @@ console.log("🔎 Supabase ENV in use:", {
     : 0,
 };
 
+// Require real values (no mock fallback)
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error("❌ Missing Supabase environment variables!");
+}
+
 // Check if Supabase is properly configured
 export const isSupabaseReady = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 
-// Create the client even if not ready (for mock mode compatibility)
+// Create the real Supabase client
 export const supabase: SupabaseClient = createClient(
-  SUPABASE_URL || "http://localhost:54321",
-  SUPABASE_ANON_KEY || "fake-anon-key"
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
 );
-
