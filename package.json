@@ -2,9 +2,13 @@
   "name": "leap-app",
   "version": "1.0.0",
   "type": "module",
-  "packageManager": "bun",
+  "packageManager": "bun@1.1.0",
   "workspaces": [
     "backend",
     "frontend"
-  ]
+  ],
+  "scripts": {
+    "build": "cd frontend && bun run build",
+    "start": "cd frontend && bun run dev"
+  }
 }
