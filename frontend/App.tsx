@@ -4,6 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Header } from "./components/Header";
 import { LoginPage } from "./pages/LoginPage";
+import { SignupPage } from "./pages/SignupPage";   // <-- NEW IMPORT
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
 import { OnboardingStartPage } from "./pages/OnboardingStartPage";
@@ -21,6 +22,7 @@ export default function App() {
             <main className="container mx-auto px-4 py-8">
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/signup" element={<SignupPage />} />  {/* <-- NEW ROUTE */}
                 <Route
                   path="/dashboard"
                   element={
@@ -55,3 +57,4 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
