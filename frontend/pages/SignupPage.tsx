@@ -31,6 +31,7 @@ export function SignupPage() {
     setError(null);
 
     try {
+      // Step 1: Supabase signup
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -41,7 +42,20 @@ export function SignupPage() {
 
       if (signUpError) throw signUpError;
 
-      // ✅ after signup, send to onboarding
+      // Step 2: Call n8n webhook for provider onboarding
+      await fetch("https://api.ecrofmedia.xyz:5678/webhook/provider-onboarding", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          businessName,
+          name,
+          email,
+        }),
+      });
+
+      // Step 3: Redirect after signup
       navigate("/onboarding/start", { replace: true });
     } catch (err: any) {
       setError(err.message || "Signup failed");
