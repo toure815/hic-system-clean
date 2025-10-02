@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Navigate, Link } from "react-router-dom";
+import { Navigate, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../utils/supabase";
 
 export function SignupPage() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [businessName, setBusinessName] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -37,7 +38,11 @@ export function SignupPage() {
           data: { businessName, name },
         },
       });
+
       if (signUpError) throw signUpError;
+
+      // ✅ after signup, send to onboarding
+      navigate("/onboarding/start", { replace: true });
     } catch (err: any) {
       setError(err.message || "Signup failed");
     } finally {
@@ -141,4 +146,5 @@ export function SignupPage() {
     </div>
   );
 }
+
 
