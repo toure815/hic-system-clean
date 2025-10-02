@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export function LoginPage() {
@@ -91,8 +91,17 @@ export function LoginPage() {
             <span>↪</span> {submitting ? "Signing in..." : "Sign in"}
           </button>
         </form>
+
+        {/* Redirect link */}
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Don’t have an account?{" "}
+          <Link to="/signup" className="text-blue-600 hover:underline">
+            Create one
+          </Link>
+        </p>
       </div>
     </div>
   );
 }
+
 
