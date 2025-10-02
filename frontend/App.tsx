@@ -2,9 +2,10 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { ProtectedOnboardingRoute } from "./components/ProtectedOnboardingRoute"; // <-- NEW
 import { Header } from "./components/Header";
 import { LoginPage } from "./pages/LoginPage";
-import { SignupPage } from "./pages/SignupPage";   // <-- NEW IMPORT
+import { SignupPage } from "./pages/SignupPage";   // <-- NEW
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
 import { OnboardingStartPage } from "./pages/OnboardingStartPage";
@@ -21,8 +22,11 @@ export default function App() {
             <Header />
             <main className="container mx-auto px-4 py-8">
               <Routes>
+                {/* Public routes */}
                 <Route path="/login" element={<LoginPage />} />
-                <Route path="/signup" element={<SignupPage />} />  {/* <-- NEW ROUTE */}
+                <Route path="/signup" element={<SignupPage />} />
+
+                {/* Protected routes */}
                 <Route
                   path="/dashboard"
                   element={
@@ -42,11 +46,13 @@ export default function App() {
                 <Route
                   path="/onboarding/start"
                   element={
-                    <ProtectedRoute allowedRoles={["client"]}>
+                    <ProtectedOnboardingRoute>
                       <OnboardingStartPage />
-                    </ProtectedRoute>
+                    </ProtectedOnboardingRoute>
                   }
                 />
+
+                {/* Default redirect */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
               </Routes>
             </main>
