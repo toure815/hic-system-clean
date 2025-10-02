@@ -9,7 +9,12 @@ import { supabase, isSupabaseReady } from "../utils/supabase";
 import { MOCK_AUTH } from "../utils/featureFlags";
 
 type Role = "admin" | "client";
-type AppUser = { id: string; email: string; role: Role };
+type AppUser = {
+  id: string;
+  email: string;
+  role: Role;
+  onboardingComplete?: boolean; // ✅ Added onboarding flag
+};
 
 type AuthContextValue = {
   user: AppUser | null;
@@ -63,11 +68,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(null);
       return;
     }
+
     const role = (session.user.user_metadata?.role as Role) || "client";
+    const onboardingComplete = !!session.user.user_metadata?.onboardingComplete; // ✅ check metadata
+
     setUser({
       id: session.user.id,
       email: session.user.email ?? "",
       role,
+      onboardingComplete, // ✅ include onboarding flag
     });
   }
 
@@ -76,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (MOCK_AUTH || !isSupabaseReady) {
       // Mock mode login
       const role: Role = email.includes("admin") ? "admin" : "client";
-      const fakeUser = { id: "mock-id", email, role };
+      const fakeUser: AppUser = { id: "mock-id", email, role, onboardingComplete: false };
       localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(fakeUser));
       setUser(fakeUser);
       return;
@@ -136,3 +145,4 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
   return ctx;
 }
+
