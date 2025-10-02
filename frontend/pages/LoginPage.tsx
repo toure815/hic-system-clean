@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { MOCK_AUTH } from "../utils/featureFlags";
 
@@ -61,7 +61,7 @@ export function LoginPage() {
             placeholder="Email"
             required
             autoComplete="email"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
           />
           <input
             value={password}
@@ -70,7 +70,7 @@ export function LoginPage() {
             placeholder="Password"
             required
             autoComplete="current-password"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
           />
 
           {error && <div className="text-red-600 text-sm">{error}</div>}
@@ -82,6 +82,14 @@ export function LoginPage() {
           >
             {submitting ? "Signing in..." : "Sign in"}
           </button>
+
+          {/* Create Account button */}
+          <Link
+            to="/signup"
+            className="block w-full text-center mt-4 py-2 px-4 border border-gray-300 rounded-md text-black hover:bg-gray-100"
+          >
+            Create Account
+          </Link>
         </form>
       </div>
     </div>
