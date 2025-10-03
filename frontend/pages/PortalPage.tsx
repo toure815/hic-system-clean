@@ -96,7 +96,7 @@ export function PortalPage() {
             </p>
             <Button
               size="sm"
-              className="w-full bg-gray-500 hover:bg-gray-600 text-white"
+              className="w-full bg-black hover:bg-gray-800 text-white"
             >
               <Upload className="h-3 w-3 mr-1" />
               Upload Documents
