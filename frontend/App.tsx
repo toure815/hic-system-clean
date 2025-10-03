@@ -2,13 +2,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { ProtectedOnboardingRoute } from "./components/ProtectedOnboardingRoute"; // <-- NEW
+import { ProtectedOnboardingRoute } from "./components/ProtectedOnboardingRoute"; 
 import { Header } from "./components/Header";
 import { LoginPage } from "./pages/LoginPage";
-import { SignupPage } from "./pages/SignupPage";   // <-- NEW
+import { SignupPage } from "./pages/SignupPage";   
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
 import { OnboardingStartPage } from "./pages/OnboardingStartPage";
+import { MessagesPage } from "./pages/MessagesPage";   // <-- NEW
 import { Toaster } from "@/components/ui/toaster";
 
 const queryClient = new QueryClient();
@@ -51,6 +52,14 @@ export default function App() {
                     </ProtectedOnboardingRoute>
                   }
                 />
+                <Route
+                  path="/messages"
+                  element={
+                    <ProtectedRoute allowedRoles={["client"]}>
+                      <MessagesPage />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Default redirect */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
@@ -63,4 +72,3 @@ export default function App() {
     </QueryClientProvider>
   );
 }
-
