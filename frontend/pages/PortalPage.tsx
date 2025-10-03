@@ -15,18 +15,12 @@ import {
   CheckCircle,
   Upload,
 } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 
 export function PortalPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Track file + status
-  const [files, setFiles] = useState<File[]>([]);
-  const [status, setStatus] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-
-  // 1) Loading guard
   if (loading) {
     return (
       <div className="p-6">
@@ -35,54 +29,12 @@ export function PortalPage() {
     );
   }
 
-  // 2) Not logged in → bounce to login
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  // Mock data - replace later if needed
+  // Mock data – replace later
   const uploadedDocsCount = 0;
-
-  async function handleUpload(e: React.FormEvent) {
-    e.preventDefault();
-    if (files.length === 0) return;
-    setUploading(true);
-    setStatus(null);
-
-    try {
-      const formData = new FormData();
-      files.forEach((file, i) => formData.append(`file${i}`, file));
-
-      // Attach metadata (for n8n mapping → SharePoint foldering)
-      formData.append("userEmail", user.email || "");
-      formData.append("businessName", (user as any)?.businessName || "");
-
-      const resp = await fetch(
-        "https://api.ecrofmedia.xyz:5678/webhook/uploading-doc",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!resp.ok) throw new Error("Upload failed");
-
-      const result = await resp.json().catch(() => ({}));
-      if (result.success !== false) {
-        setStatus(
-          "✅ Documents uploaded successfully! They are being transferred to SharePoint."
-        );
-      } else {
-        setStatus("⚠️ Upload failed, please try again.");
-      }
-    } catch (err) {
-      console.error(err);
-      setStatus("❌ Error uploading documents.");
-    } finally {
-      setUploading(false);
-      setFiles([]);
-    }
-  }
 
   return (
     <div className="space-y-6">
@@ -128,8 +80,11 @@ export function PortalPage() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Documents Card with Upload */}
-        <Card className="hover:shadow-md transition-shadow">
+        {/* Documents Card – now links to dedicated upload page */}
+        <Card
+          className="hover:shadow-md transition-shadow cursor-pointer"
+          onClick={() => navigate("/documents")}
+        >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Documents</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
@@ -137,34 +92,15 @@ export function PortalPage() {
           <CardContent>
             <div className="text-2xl font-bold">{uploadedDocsCount}</div>
             <p className="text-xs text-muted-foreground mb-3">
-              Upload provider documents (will be transferred to SharePoint).
+              Manage and upload provider documents
             </p>
-
-            <form onSubmit={handleUpload} className="space-y-2">
-              <input
-                type="file"
-                multiple
-                onChange={(e) =>
-                  setFiles(e.target.files ? Array.from(e.target.files) : [])
-                }
-                className="text-sm"
-              />
-              <Button
-                type="submit"
-                size="sm"
-                className="w-full bg-black hover:bg-gray-800 text-white"
-                disabled={uploading || files.length === 0}
-              >
-                <Upload className="h-3 w-3 mr-1" />
-                {uploading ? "Uploading..." : "Upload Documents"}
-              </Button>
-            </form>
-
-            {status && (
-              <p className="text-xs mt-2 text-gray-600 whitespace-pre-line">
-                {status}
-              </p>
-            )}
+            <Button
+              size="sm"
+              className="w-full bg-black hover:bg-gray-800 text-white"
+            >
+              <Upload className="h-3 w-3 mr-1" />
+              Upload Documents
+            </Button>
           </CardContent>
         </Card>
 
@@ -236,7 +172,10 @@ export function PortalPage() {
               >
                 → Start Credentialing
               </div>
-              <div className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer">
+              <div
+                className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
+                onClick={() => navigate("/documents")}
+              >
                 → Upload Documents
               </div>
               <div
