@@ -8,12 +8,12 @@ import React, {
 import { supabase, isSupabaseReady } from "../utils/supabase";
 import { MOCK_AUTH } from "../utils/featureFlags";
 
-type Role = "admin" | "client";
-type AppUser = {
+export type UserRole = "admin" | "client"; // ✅ Exported so other files can use
+export type AppUser = {
   id: string;
   email: string;
-  role: Role;
-  onboardingComplete?: boolean; // ✅ Added onboarding flag
+  role: UserRole;
+  onboardingComplete?: boolean;
 };
 
 type AuthContextValue = {
@@ -69,29 +69,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    const role = (session.user.user_metadata?.role as Role) || "client";
-    const onboardingComplete = !!session.user.user_metadata?.onboardingComplete; // ✅ check metadata
+    const role = (session.user.user_metadata?.role as UserRole) || "client";
+    const onboardingComplete = !!session.user.user_metadata?.onboardingComplete;
 
     setUser({
       id: session.user.id,
       email: session.user.email ?? "",
       role,
-      onboardingComplete, // ✅ include onboarding flag
+      onboardingComplete,
     });
   }
 
   // Login handler
   async function loginWithEmail(email: string, password: string) {
     if (MOCK_AUTH || !isSupabaseReady) {
-      // Mock mode login
-      const role: Role = email.includes("admin") ? "admin" : "client";
+      const role: UserRole = email.includes("admin") ? "admin" : "client";
       const fakeUser: AppUser = { id: "mock-id", email, role, onboardingComplete: false };
       localStorage.setItem(MOCK_STORAGE_KEY, JSON.stringify(fakeUser));
       setUser(fakeUser);
       return;
     }
 
-    // Real Supabase login
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -145,4 +143,5 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
   return ctx;
 }
+
 
