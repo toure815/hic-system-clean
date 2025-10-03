@@ -9,7 +9,8 @@ import { SignupPage } from "./pages/SignupPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
 import { OnboardingStartPage } from "./pages/OnboardingStartPage";
-import { MessagesPage } from "./pages/MessagesPage";   // <-- NEW
+import { MessagesPage } from "./pages/MessagesPage";   
+import { DocumentsPage } from "./pages/DocumentsPage";  // ✅ Added
 import { Toaster } from "@/components/ui/toaster";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,14 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/documents"   // ✅ NEW documents route
+                  element={
+                    <ProtectedRoute allowedRoles={["client"]}>
+                      <DocumentsPage />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Default redirect */}
                 <Route path="/" element={<Navigate to="/login" replace />} />
@@ -72,3 +81,4 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
