@@ -22,7 +22,7 @@ export function PortalPage() {
   const navigate = useNavigate();
 
   // Track file + status
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -40,20 +40,22 @@ export function PortalPage() {
     return <Navigate to="/login" replace />;
   }
 
-  // Mock data - replace later
+  // Mock data - replace later if needed
   const uploadedDocsCount = 0;
 
   async function handleUpload(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) return;
+    if (files.length === 0) return;
     setUploading(true);
     setStatus(null);
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("userEmail", user.email || ""); // attach email for mapping
-      formData.append("businessName", user?.businessName || ""); // if stored in metadata
+      files.forEach((file, i) => formData.append(`file${i}`, file));
+
+      // Attach metadata (for n8n mapping → SharePoint foldering)
+      formData.append("userEmail", user.email || "");
+      formData.append("businessName", (user as any)?.businessName || "");
 
       const resp = await fetch(
         "https://api.ecrofmedia.xyz:5678/webhook/uploading-doc",
@@ -65,17 +67,20 @@ export function PortalPage() {
 
       if (!resp.ok) throw new Error("Upload failed");
 
-      const result = await resp.json();
-      if (result.success) {
-        setStatus("✅ Document uploaded to SharePoint successfully");
+      const result = await resp.json().catch(() => ({}));
+      if (result.success !== false) {
+        setStatus(
+          "✅ Documents uploaded successfully! They are being transferred to SharePoint."
+        );
       } else {
-        setStatus("⚠️ Upload failed, please try again");
+        setStatus("⚠️ Upload failed, please try again.");
       }
     } catch (err) {
-      setStatus("❌ Error uploading document");
+      console.error(err);
+      setStatus("❌ Error uploading documents.");
     } finally {
       setUploading(false);
-      setFile(null);
+      setFiles([]);
     }
   }
 
@@ -132,23 +137,26 @@ export function PortalPage() {
           <CardContent>
             <div className="text-2xl font-bold">{uploadedDocsCount}</div>
             <p className="text-xs text-muted-foreground mb-3">
-              Uploaded documents
+              Upload provider documents (will be transferred to SharePoint).
             </p>
 
             <form onSubmit={handleUpload} className="space-y-2">
               <input
                 type="file"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                multiple
+                onChange={(e) =>
+                  setFiles(e.target.files ? Array.from(e.target.files) : [])
+                }
                 className="text-sm"
               />
               <Button
                 type="submit"
                 size="sm"
                 className="w-full bg-black hover:bg-gray-800 text-white"
-                disabled={uploading || !file}
+                disabled={uploading || files.length === 0}
               >
                 <Upload className="h-3 w-3 mr-1" />
-                {uploading ? "Uploading..." : "Upload Document"}
+                {uploading ? "Uploading..." : "Upload Documents"}
               </Button>
             </form>
 
@@ -160,17 +168,27 @@ export function PortalPage() {
           </CardContent>
         </Card>
 
+        {/* Messages */}
         <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Messages</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">Coming soon</p>
+            <iframe
+              src="https://api.ecrofmediaco.com/widget/form/b75H76Mxa96eArrM1dN5"
+              style={{
+                width: "100%",
+                height: "300px",
+                border: "none",
+                borderRadius: "3px",
+              }}
+              title="Portal Messages"
+            ></iframe>
           </CardContent>
         </Card>
 
+        {/* Settings */}
         <Card
           className="hover:shadow-md transition-shadow cursor-pointer"
           onClick={() => navigate("/settings")}
@@ -180,8 +198,10 @@ export function PortalPage() {
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">--</div>
-            <p className="text-xs text-muted-foreground">Account settings</p>
+            <div className="text-2xl font-bold">⚙️</div>
+            <p className="text-xs text-muted-foreground">
+              Update your account settings
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -235,5 +255,6 @@ export function PortalPage() {
     </div>
   );
 }
+
 
 
