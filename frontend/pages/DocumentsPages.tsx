@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +10,9 @@ export function DocumentsPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // ref so we can trigger hidden file input on box click
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   if (loading) return <div className="p-6">Loading…</div>;
   if (!user) return <Navigate to="/login" replace />;
@@ -55,36 +58,43 @@ export function DocumentsPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpload} className="space-y-4">
-            {/* Drag and Drop Zone */}
+            {/* Drag & Drop + Click Zone */}
             <div
+              onClick={() => fileInputRef.current?.click()}
               onDrop={(e) => {
                 e.preventDefault();
                 setFiles(Array.from(e.dataTransfer.files));
               }}
               onDragOver={(e) => e.preventDefault()}
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-500"
+              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-500 transition"
             >
               <Upload className="h-8 w-8 mx-auto mb-2 text-gray-500" />
               <p className="text-sm text-gray-600">
-                Drag & drop files here or click below to select
+                Drag & drop files here, or <span className="text-blue-600 underline">click to browse</span>
               </p>
               <input
                 type="file"
+                ref={fileInputRef}
                 multiple
                 onChange={(e) =>
                   setFiles(e.target.files ? Array.from(e.target.files) : [])
                 }
-                className="mt-2 block mx-auto"
+                className="hidden"
               />
             </div>
 
             {/* Show selected files */}
             {files.length > 0 && (
-              <ul className="text-sm text-gray-700">
-                {files.map((f, i) => (
-                  <li key={i}>📄 {f.name}</li>
-                ))}
-              </ul>
+              <div className="bg-gray-50 rounded-md p-3 border">
+                <p className="text-sm font-medium mb-1">
+                  Selected {files.length} file{files.length > 1 ? "s" : ""}:
+                </p>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  {files.map((f, i) => (
+                    <li key={i}>📄 {f.name}</li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             <Button
@@ -97,7 +107,7 @@ export function DocumentsPage() {
           </form>
 
           {status && (
-            <p className="text-sm mt-3 text-gray-600 whitespace-pre-line">
+            <p className="text-sm mt-3 text-gray-700 whitespace-pre-line">
               {status}
             </p>
           )}
