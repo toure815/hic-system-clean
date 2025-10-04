@@ -9,7 +9,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, X, ArrowLeft } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+
+interface UploadedFile {
+  name: string;
+  size: number;
+  uploadedAt: string;
+  uploadedBy: string; // email or user name
+}
 
 export function DocumentsPage() {
   const { user, loading } = useAuth();
@@ -18,7 +25,7 @@ export function DocumentsPage() {
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>("");
-  const [uploadedCount, setUploadedCount] = useState(0);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (loading) {
@@ -82,10 +89,20 @@ export function DocumentsPage() {
         );
 
         if (!response.ok) throw new Error("Upload failed");
+
+        // Add to local state for recent uploads list
+        setUploadedFiles((prev) => [
+          {
+            name: file.name,
+            size: file.size,
+            uploadedAt: new Date().toLocaleString(),
+            uploadedBy: user?.email || "unknown",
+          },
+          ...prev,
+        ]);
       }
 
       setStatusMessage("✅ All documents uploaded successfully!");
-      setUploadedCount((prev) => prev + files.length);
       setFiles([]);
     } catch (error) {
       console.error(error);
@@ -101,7 +118,7 @@ export function DocumentsPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Upload Documents</h1>
           <p className="text-gray-600 mt-1">
-            {uploadedCount} document{uploadedCount !== 1 ? "s" : ""} uploaded
+            {uploadedFiles.length} document{uploadedFiles.length !== 1 ? "s" : ""} total
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -124,6 +141,7 @@ export function DocumentsPage() {
         </div>
       </div>
 
+      {/* Upload Section */}
       <Card className="shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
           <CardTitle>Upload Provider Documents</CardTitle>
@@ -173,41 +191,6 @@ export function DocumentsPage() {
           </div>
 
           {files.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">Selected Files:</p>
-              <div className="space-y-2 max-h-64 overflow-y-auto">
-                {files.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <FileText className="h-5 w-5 text-gray-500" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">
-                          {file.name}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {(file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeFile(index);
-                      }}
-                      className="p-1 hover:bg-gray-200 rounded-full transition-colors"
-                    >
-                      <X className="h-4 w-4 text-gray-600" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {files.length > 0 && (
             <Button
               onClick={handleUpload}
               disabled={uploading}
@@ -232,6 +215,40 @@ export function DocumentsPage() {
               }`}
             >
               {statusMessage}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ✅ Recent Uploads List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Recent Uploads</CardTitle>
+          <CardDescription>
+            {user.role === "admin"
+              ? "Viewing all recent uploads across users"
+              : "Your recent document uploads"}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {uploadedFiles.length === 0 ? (
+            <p className="text-sm text-gray-600">No uploads yet.</p>
+          ) : (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {uploadedFiles.map((file, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {(file.size / 1024 / 1024).toFixed(2)} MB •{" "}
+                      Uploaded by {file.uploadedBy} at {file.uploadedAt}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
