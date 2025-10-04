@@ -10,7 +10,7 @@ import { DashboardPage } from "./pages/DashboardPage";
 import { PortalPage } from "./pages/PortalPage";
 import { OnboardingStartPage } from "./pages/OnboardingStartPage";
 import { MessagesPage } from "./pages/MessagesPage";   
-import { DocumentsPage } from "./pages/DocumentsPage";  // ✅ Added
+import { DocumentsPage } from "./pages/DocumentsPage";  
 import { Toaster } from "@/components/ui/toaster";
 
 const queryClient = new QueryClient();
@@ -61,10 +61,12 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+
+                {/* ✅ Documents now accessible by both client and admin */}
                 <Route
-                  path="/documents"   // ✅ NEW documents route
+                  path="/documents"
                   element={
-                    <ProtectedRoute allowedRoles={["client"]}>
+                    <ProtectedRoute allowedRoles={["client", "admin"]}>
                       <DocumentsPage />
                     </ProtectedRoute>
                   }
@@ -81,4 +83,5 @@ export default function App() {
     </QueryClientProvider>
   );
 }
+
 
