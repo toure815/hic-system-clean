@@ -104,10 +104,24 @@ export function DocumentsPage() {
             {uploadedCount} document{uploadedCount !== 1 ? "s" : ""} uploaded
           </p>
         </div>
-        <Button variant="outline" onClick={() => navigate("/portal")}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Portal
-        </Button>
+        <div className="flex items-center gap-3">
+          {/* ✅ Role Badge */}
+          {user?.role && (
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                user.role === "admin"
+                  ? "bg-purple-100 text-purple-800 border border-purple-300"
+                  : "bg-green-100 text-green-800 border border-green-300"
+              }`}
+            >
+              {user.role === "admin" ? "Admin View" : "Client View"}
+            </span>
+          )}
+          <Button variant="outline" onClick={() => navigate("/portal")}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Portal
+          </Button>
+        </div>
       </div>
 
       <Card className="shadow-md hover:shadow-lg transition-shadow">
@@ -160,9 +174,7 @@ export function DocumentsPage() {
 
           {files.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">
-                Selected Files:
-              </p>
+              <p className="text-sm font-medium text-gray-700">Selected Files:</p>
               <div className="space-y-2 max-h-64 overflow-y-auto">
                 {files.map((file, index) => (
                   <div
@@ -227,3 +239,4 @@ export function DocumentsPage() {
     </div>
   );
 }
+
