@@ -39,5 +39,10 @@
   },
   "optionalDependencies": {
     "rollup": "^4.39.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   }
 }
