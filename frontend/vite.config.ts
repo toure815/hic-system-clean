@@ -18,16 +18,17 @@ export default defineConfig({
     port: 5173,
     open: true,
     host: '0.0.0.0',
-    allowedHosts: ['hic-system.onrender.com'], // ✅ allow your live domain
+    allowedHosts: ['hic-system.onrender.com', 'localhost'], // ✅ Render + local dev
   },
   preview: {
     port: 10000,
     host: '0.0.0.0',
-    allowedHosts: ['hic-system.onrender.com'], // ✅ same for preview
+    allowedHosts: ['hic-system.onrender.com', 'localhost'], // ✅ ensures access in Render
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
-    minify: false,
+    sourcemap: false, // ✅ no unnecessary mapping in prod
+    minify: true,     // ✅ ensures smaller build & faster load
   },
 })
+
