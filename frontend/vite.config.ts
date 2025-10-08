@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+// https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
     alias: {
@@ -14,6 +15,8 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.js',
   },
+
+  // 🚀 Local Development
   server: {
     port: 5173,
     open: true,
@@ -22,23 +25,22 @@ export default defineConfig({
       'hic-system.onrender.com',
       'localhost',
       '.onrender.com',
-      '0.0.0.0'
-    ], // ✅ Render + local dev
+      '0.0.0.0',
+    ], // ✅ allows Render & local dev
   },
+
+  // 🌐 Production Preview (Render)
   preview: {
     port: 10000,
     host: '0.0.0.0',
-    allowedHosts: [
-      'hic-system.onrender.com',
-      'localhost',
-      '.onrender.com',
-      '0.0.0.0'
-    ], // ✅ ensures access in Render
+    allowedHosts: ['*'], // ✅ allow all for Render health check
   },
+
+  // 🏗️ Build Configuration
   build: {
-    outDir: 'dist',
-    emptyOutDir: true, // ✅ clears old build before new one
-    sourcemap: false,  // ✅ no unnecessary mapping in prod
-    minify: true,      // ✅ ensures smaller build & faster load
+    outDir: 'dist',          // output folder for build files
+    emptyOutDir: true,       // clear old build before new one
+    sourcemap: false,        // no unnecessary mapping in prod
+    minify: true,            // smaller, faster build
   },
 })
