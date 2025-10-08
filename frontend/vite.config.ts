@@ -18,18 +18,27 @@ export default defineConfig({
     port: 5173,
     open: true,
     host: '0.0.0.0',
-    allowedHosts: ['hic-system.onrender.com', 'localhost'], // ✅ Render + local dev
+    allowedHosts: [
+      'hic-system.onrender.com',
+      'localhost',
+      '.onrender.com',
+      '0.0.0.0'
+    ], // ✅ Render + local dev
   },
   preview: {
     port: 10000,
     host: '0.0.0.0',
-    allowedHosts: ['hic-system.onrender.com', 'localhost'], // ✅ ensures access in Render
+    allowedHosts: [
+      'hic-system.onrender.com',
+      'localhost',
+      '.onrender.com',
+      '0.0.0.0'
+    ], // ✅ ensures access in Render
   },
   build: {
     outDir: 'dist',
-    emptyOutDir: true,
-    sourcemap: false, // ✅ no unnecessary mapping in prod
-    minify: true,     // ✅ ensures smaller build & faster load
+    emptyOutDir: true, // ✅ clears old build before new one
+    sourcemap: false,  // ✅ no unnecessary mapping in prod
+    minify: true,      // ✅ ensures smaller build & faster load
   },
 })
-
