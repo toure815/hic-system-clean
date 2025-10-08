@@ -27,6 +27,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
     sourcemap: false, // ✅ no unnecessary mapping in prod
     minify: true,     // ✅ ensures smaller build & faster load
   },
