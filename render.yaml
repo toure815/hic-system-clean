@@ -13,9 +13,13 @@ services:
     envVars:
       - key: VITE_API_URL
         sync: false
+
       - key: VITE_API_BASE_URL
         sync: false
+
       - key: VITE_SUPABASE_URL
         sync: false
+
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
+
