@@ -11,7 +11,7 @@ services:
         destination: /index.html
     envVars:
       - key: NODE_VERSION
-        value: 22.21.1
+        value: 22.11.1
       - key: VITE_API_URL
         value: https://staging-auth-system-bn9i.encr.app
       - key: VITE_API_BASE_URL
