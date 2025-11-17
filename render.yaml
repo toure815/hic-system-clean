@@ -1,19 +1,20 @@
 services:
   - type: static
     name: hic-system
-    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     publishPath: dist
+
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
+
     envVars:
       - key: VITE_API_URL
-        value: https://staging-auth-system-bn9i.encr.app
+        sync: false
       - key: VITE_API_BASE_URL
-        value: https://staging-auth-system-bn9i.encr.app
+        sync: false
       - key: VITE_SUPABASE_URL
         sync: false
       - key: VITE_SUPABASE_ANON_KEY
