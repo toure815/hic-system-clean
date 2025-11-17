@@ -30,8 +30,7 @@ npm install -g bun
    encore run
    ```
 
-The backend will be available at the URL shown in your terminal (typically `http://localhost:4000`).
-
+The backend will be available at the local development URL shown in your terminal.
 
 
 ### Frontend Setup
