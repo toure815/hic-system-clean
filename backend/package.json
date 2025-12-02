@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "bun",
   "scripts": {
-    "build": "echo 'Backend build complete\""
+    "build": "echo \"Backend build complete\""
   },
   "dependencies": {
     "encore.dev": "^1.52.1",
