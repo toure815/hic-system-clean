@@ -42,9 +42,7 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: false,
     minify: true,
-
-  // 🔥 REQUIRED FOR RENDER TO SHOW CSS
-    assetsDir: '',
+    assetsDir: 'assets',
   },
 })
 
