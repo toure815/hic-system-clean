@@ -1,4 +1,4 @@
 import { Service } from "encore.dev/service";
 
-export const service = new Service("health");
+export const healthService = new Service("health");
 
