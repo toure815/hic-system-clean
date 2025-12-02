@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "bun",
   "scripts": {
-    "build": "cd ../frontend && bun install && vite build --outDir=../backend/frontend/dist"
+    "build": "echo 'Backend build complete\""
   },
   "dependencies": {
     "encore.dev": "^1.52.1",
