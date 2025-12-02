@@ -1,10 +1,16 @@
 {
-  "name": "leap-app",
+  "name": "backend",
   "version": "1.0.0",
   "type": "module",
   "packageManager": "bun",
-  "workspaces": [
-    "backend",
-    "frontend"
-  ]
+  "scripts": {
+    "build": "cd ../frontend && bun install && vite build --outDir=../backend/frontend/dist"
+  },
+  "dependencies": {
+    "encore.dev": "^1.52.1",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
 }
