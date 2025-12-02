@@ -1,2 +1,4 @@
-export const service = { name: "health" } as const;
+import { Service } from "encore.dev/service";
+
+export const service = new Service("health");
 
