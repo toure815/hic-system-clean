@@ -7,6 +7,6 @@
     "development": {},
     "production": {}
   },
-  "lang": "ts"
+  "lang": "typescript"
 }
 
