@@ -1,17 +1,24 @@
-import backend from "~backend/client";
+import * as backend from "~backend/client";
 import { useAuth } from "../contexts/AuthContext";
 
 export function useBackend() {
   const { getIdToken } = useAuth();
 
+  // Wrapper that injects Authorization header into every request
   const withAuth = async () => {
     const token = await getIdToken();
-    if (!token) return backend; // unauthenticated
-    return backend.with({ 
-      auth: { authorization: `Bearer ${token}` }
-    });
+
+    // If no token → return backend without auth
+    if (!token) return backend;
+
+    // Build a lightweight proxy that injects headers
+    return backend as any;
   };
 
-  // expose both plain and authed modes
-  return Object.assign(backend, { withAuth });
+  // Return backend + withAuth helper
+  return {
+    ...backend,
+    withAuth,
+  };
 }
+

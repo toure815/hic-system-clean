@@ -11,16 +11,16 @@ import type { CookieWithOptions } from "encore.dev/api";
  */
 export type BaseURL = string;
 
-export const Local: BaseURL = "";
+// Local dev backend (Encore local)
+export const Local: BaseURL = "http://localhost:4000";
 
+// Production backend (Render)
+export const Production: BaseURL = "https://hic-system-clean.onrender.com";
 
-/**
- * BaseURL is the base URL for calling the Encore application's API.
- */
-export type BaseURL = string
+// Auto-choose based on environment
+export const BaseURL: BaseURL =
+  import.meta.env.MODE === "development" ? Local : Production;
 
-// export const Local: BaseURL = "http://localhost:4000"
-export const Local: BaseURL = "";
 
 
 /**

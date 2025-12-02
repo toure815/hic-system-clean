@@ -1,18 +1,14 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
-# Ensure Bun is available
-curl -fsSL https://bun.sh/install | bash
-export PATH="$HOME/.bun/bin:$PATH"
+echo "🚀 Building frontend for Render..."
 
-# Print Bun version for sanity
-bun --version
+# Install dependencies
+npm install
 
-# Install dependencies at the root (monorepo aware)
-bun install --frozen-lockfile
+# Build Vite app
+npm run build
 
-# Build frontend
-cd frontend
-bun install --frozen-lockfile
-bun run build
+# Render expects output in a folder called 'dist'
+echo "🎉 Build complete! Render will now serve the dist/ folder."
 

@@ -2,8 +2,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig({
+  // ❗ REQUIRED for Render static hosting
+  base: './',
+
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './'),
@@ -11,10 +13,8 @@ export default defineConfig({
       '~backend': path.resolve(__dirname, '../backend'),
     },
   },
+
   plugins: [react()],
-  css: {
-    postcss: './postcss.config.js',
-  },
 
   // 🚀 Local Development
   server: {
@@ -22,25 +22,29 @@ export default defineConfig({
     open: true,
     host: '0.0.0.0',
     allowedHosts: [
-      'hic-system.onrender.com',
+      'hic-system-clean.onrender.com',
       'localhost',
-      '.onrender.com',
       '0.0.0.0',
-    ], // ✅ allows Render & local dev
+      '.onrender.com',
+    ],
   },
 
   // 🌐 Production Preview (Render)
   preview: {
     port: 10000,
     host: '0.0.0.0',
-    allowedHosts: ['*'], // ✅ allow all for Render health check
+    allowedHosts: ['*'], // ← this MUST be '*'
   },
 
-  // 🏗️ Build Configuration
+  // 🏗️ Production Build Config
   build: {
-    outDir: 'dist',          // output folder for build files
-    emptyOutDir: true,       // clear old build before new one
-    sourcemap: false,        // no unnecessary mapping in prod
-    minify: true,            // smaller, faster build
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: false,
+    minify: true,
+
+  // 🔥 REQUIRED FOR RENDER TO SHOW CSS
+    assetsDir: '',
   },
 })
+
