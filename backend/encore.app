@@ -1,7 +1,7 @@
 {
-  "id": "hic-system-clean",
+  "id": "auth-system-bn9i",
   "org": "default",
-  "name": "hic-system-clean",
+  "name": "auth-system-bn9i",
   "description": "HIC System Backend",
   "env": {
     "development": {},
