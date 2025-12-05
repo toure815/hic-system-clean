@@ -1,6 +1,6 @@
  services:
   - type: static
-    name: hic-system
+    name: hic-system-clean
     rootDir: frontend
     buildCommand: npm install && npm run build
     publishPath: dist
