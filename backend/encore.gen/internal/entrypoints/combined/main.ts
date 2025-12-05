@@ -10,9 +10,9 @@ import { completeOnboarding as onboarding_completeOnboardingImpl5 } from "../../
 import { getDraft as onboarding_getDraftImpl6 } from "../../../../onboarding/get_draft";
 import { saveDraft as onboarding_saveDraftImpl7 } from "../../../../onboarding/save_draft";
 import { uploadDocument as onboarding_uploadDocumentImpl8 } from "../../../../onboarding/upload_document";
-import * as health_service from "../../../../health/encore.service";
-import * as onboarding_service from "../../../../onboarding/encore.service";
 import * as auth_service from "../../../../auth/encore.service";
+import * as onboarding_service from "../../../../onboarding/encore.service";
+import * as health_service from "../../../../health/encore.service";
 
 const gateways: any[] = [
     api_gatewayGW,
