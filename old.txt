@@ -1,0 +1,94 @@
+apiClient.ts
+App.tsx
+client.ts
+components
+contexts
+hooks
+index.css
+index.html
+lib
+main.tsx
+node_modules
+package.json
+pages
+public
+render-build.sh
+SettingsPage.tsx
+tsconfig.json
+types
+UploadDocumentsPage.tsx
+utils
+vite-env.d.ts
+vite.config.ts
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/components:
+DocumentUploader.tsx
+ForgotPasswordDialog.tsx
+Header.tsx
+onboarding
+ProtectedOnboardingRoute.tsx
+ProtectedRoute.tsx
+ui
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/components/onboarding:
+OnboardingProgress.tsx
+OnboardingSteps.tsx
+steps
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/components/onboarding/steps:
+BusinessProfileStep.tsx
+IdentifyProviderStep.tsx
+LicensesStep.tsx
+PayersStep.tsx
+PortalLoginsStep.tsx
+PracticeTypeStep.tsx
+RequiredDocsStep.tsx
+SpecialtyStep.tsx
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/components/ui:
+button.tsx
+calendar.tsx
+card.tsx
+checkbox.tsx
+dialog.tsx
+input.tsx
+label.tsx
+popover.tsx
+radio-group.tsx
+select.tsx
+textarea.tsx
+toast.tsx
+toaster.tsx
+use-toast.ts
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/contexts:
+AuthContext.tsx
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/hooks:
+useBackend.ts
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/lib:
+utils.ts
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/node_modules:
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/pages:
+DashboardPage.tsx
+DocumentsPage.tsx
+LoginPage.tsx
+MessagesPage.tsx
+OnboardingStartPage.tsx
+PortalPage.tsx
+SettingsPage.tsx
+SignupPage.tsx
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/public:
+favicon.ico
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/types:
+onboarding.ts
+
+/Users/toureyoung/Desktop/untitled folder/hic-system-old/frontend/utils:
+featureFlags.ts
+formatters.ts
+supabase.ts
